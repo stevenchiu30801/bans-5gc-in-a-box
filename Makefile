@@ -88,6 +88,15 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	touch $@
 	@echo "Kubernetes control plane node created!"
 
+/nfsshare:
+	sudo apt update
+	sudo apt install -y nfs-kernel-server
+	echo "/nfsshare   localhost(rw,sync,no_root_squash)" | sudo tee /etc/exports
+	sudo exportfs -r
+	# Check if /etc/exports is properly loaded
+	# showmount -e localhost
+	sudo mkdir /nfsshare
+
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:
 	rm -f $(M)/setup $(M)/kubeadm

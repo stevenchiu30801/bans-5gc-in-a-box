@@ -4,10 +4,10 @@ metadata:
   name: free5gc-configmap
 data:
   free5gc.conf: |
-    db_uri: mongodb://localhost/free5gc
+    db_uri: mongodb://mongo-service.default.svc.cluster.local/free5gc
     
     logger:
-        file: /home/steven/free5gc-stage-1/install/var/log/free5gc/free5gc.log
+        file: /usr/src/free5gc-stage-1/install/var/log/free5gc/free5gc.log
         trace: 
             app: 1
             s1ap: 1
