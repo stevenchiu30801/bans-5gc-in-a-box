@@ -79,7 +79,8 @@ $(M)/preference: | $(M)/setup /usr/bin/kubeadm
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
-	sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+	# sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+	sudo kubeadm init --config=deploy/kubeadm-config.yaml
 	mkdir -p $(HOME)/.kube
 	sudo cp -f /etc/kubernetes/admin.conf $(HOME)/.kube/config
 	sudo chown $(shell id -u):$(shell id -g) $(HOME)/.kube/config
@@ -100,5 +101,5 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:
 	rm -f $(M)/setup $(M)/kubeadm
-	sudo kubeadm reset -f || true
+	-sudo kubeadm reset -f
 	sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
