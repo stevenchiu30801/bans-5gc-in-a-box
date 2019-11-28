@@ -1,5 +1,5 @@
 # Refer to https://github.com/open5gs/open5gs/blob/master/docker/webui/Dockerfile
-FROM node:latest
+FROM node:carbon
 
 MAINTAINER steven30801@gmail.com
 
