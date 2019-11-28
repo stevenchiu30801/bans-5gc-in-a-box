@@ -99,12 +99,16 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: mongo free5gc-config amf
+.PHONY: mongo webui free5gc-config amf
 
 mongo:
 	kubectl apply -f $(DEPLOY)/mongo/persistentvolume.yaml
 	kubectl apply -f $(DEPLOY)/mongo/service.yaml
 	kubectl apply -f $(DEPLOY)/mongo/statefulset.yaml
+
+webui:
+	kubectl apply -f $(DEPLOY)/free5gc/webui/deployment.yaml
+	kubectl apply -f $(DEPLOY)/free5gc/webui/service.yaml
 
 free5gc-config:
 	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
@@ -113,7 +117,7 @@ amf:
 	kubectl apply -f $(DEPLOY)/free5gc/amf/freediameter-configmap.yaml
 	kubectl apply -f $(DEPLOY)/free5gc/amf/deployment.yaml
 
-deploy: $(M)/kubeadm mongo free5gc-config amf
+deploy: $(M)/kubeadm mongo webui free5gc-config amf
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:
