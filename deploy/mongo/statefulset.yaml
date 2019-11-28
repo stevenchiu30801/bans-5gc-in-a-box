@@ -20,8 +20,6 @@ spec:
           image: mongo:4.0-xenial
           command:
             - mongod
-            - "--replSet"
-            - rs0
             - "--bind_ip_all"
           ports:
             - containerPort: 27017

@@ -2,6 +2,7 @@ SHELL	:= /bin/bash
 MAKEDIR	:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD	?= $(MAKEDIR)/tmp
 M		?= $(BUILD)/milestones
+DEPLOY	?= $(MAKEDIR)/deploy
 
 # 18.06.2~ce~3-0~ubuntu in Kubernetes document
 DOCKER_VERSION	?= 18.06.2
@@ -12,7 +13,7 @@ HELM_VERSION	?= 3.0.0
 HELM_PLATFORM	?= linux-amd64
 
 # Targets
-deploy: $(M)/kubeadm
+cluster: $(M)/kubeadm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
 
@@ -97,6 +98,22 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# Check if /etc/exports is properly loaded
 	# showmount -e localhost
 	sudo mkdir /nfsshare
+
+.PHONY: mongo free5gc-config amf
+
+mongo:
+	kubectl apply -f $(DEPLOY)/mongo/persistentvolume.yaml
+	kubectl apply -f $(DEPLOY)/mongo/service.yaml
+	kubectl apply -f $(DEPLOY)/mongo/statefulset.yaml
+
+free5gc-config:
+	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
+
+amf:
+	kubectl apply -f $(DEPLOY)/free5gc/amf/freediameter-configmap.yaml
+	kubectl apply -f $(DEPLOY)/free5gc/amf/deployment.yaml
+
+deploy: $(M)/kubeadm mongo free5gc-config amf
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:

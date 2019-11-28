@@ -1,6 +1,7 @@
 # Modify from the default values generated with `kubeadm config print init-defaults`
 apiServer:
   extraArgs:
+    # https://kubernetes.io/docs/concepts/services-networking/service/#sctp
     feature-gates: "SCTPSupport=true"
   timeoutForControlPlane: 4m0s
 apiVersion: kubeadm.k8s.io/v1beta2
