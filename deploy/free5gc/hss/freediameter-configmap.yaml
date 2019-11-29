@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hss-freediameter-configmap
+data:
+  hss.conf: |
+    ### For reference, see `free5gc.conf`
+    db_uri: mongodb://mongo-service.default.svc.cluster.local/free5gc
+    
+    logger:
+        file: /usr/src/free5gc-stage-1/install/var/log/free5gc/hss.log
+        trace: 
+            app: 1
+            diameter: 1
+    
+    parameter:
+    
+    hss:
+        freeDiameter: hss.conf
