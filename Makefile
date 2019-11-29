@@ -101,7 +101,7 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: deploy mongo webui free5gc-config amf hss
+.PHONY: deploy mongo webui free5gc-config amf hss smf
 
 mongo:
 	kubectl apply -f $(DEPLOY)/mongo/persistentvolume.yaml
@@ -123,8 +123,11 @@ hss:
 	kubectl apply -f $(DEPLOY)/free5gc/hss/freediameter-configmap.yaml
 	kubectl apply -f $(DEPLOY)/free5gc/hss/deployment.yaml
 
+smf:
+	kubectl apply -f $(DEPLOY)/free5gc/smf/freediameter-configmap.yaml
+	kubectl apply -f $(DEPLOY)/free5gc/smf/deployment.yaml
 
-deploy: $(M)/kubeadm mongo webui free5gc-config amf hss
+deploy: $(M)/kubeadm mongo webui free5gc-config amf hss smf
 	@echo "Deployment completed!"
 
 .PHONY: reset-kubeadm
