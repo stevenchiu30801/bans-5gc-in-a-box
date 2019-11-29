@@ -9,6 +9,8 @@ DOCKER_VERSION	?= 18.06.2
 
 K8S_VERSION		?= 1.16.2
 
+CALICO_VERSION	?= 3.8
+
 HELM_VERSION	?= 3.0.0
 HELM_PLATFORM	?= linux-amd64
 
@@ -85,7 +87,7 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	mkdir -p $(HOME)/.kube
 	sudo cp -f /etc/kubernetes/admin.conf $(HOME)/.kube/config
 	sudo chown $(shell id -u):$(shell id -g) $(HOME)/.kube/config
-	kubectl apply -f https://docs.projectcalico.org/v3.8/manifests/calico.yaml
+	kubectl apply -f https://docs.projectcalico.org/v${CALICO_VERSION}/manifests/calico.yaml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 	touch $@
 	@echo "Kubernetes control plane node created!"
@@ -99,7 +101,7 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: mongo webui free5gc-config amf
+.PHONY: deploy mongo webui free5gc-config amf
 
 mongo:
 	kubectl apply -f $(DEPLOY)/mongo/persistentvolume.yaml
@@ -118,6 +120,9 @@ amf:
 	kubectl apply -f $(DEPLOY)/free5gc/amf/deployment.yaml
 
 deploy: $(M)/kubeadm mongo webui free5gc-config amf
+	@echo "Deployment completed!"
+
+.PHONY: reset-kubeadm
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:

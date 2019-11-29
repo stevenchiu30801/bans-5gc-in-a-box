@@ -13,6 +13,8 @@ spec:
     metadata:
       labels:
         app: amf
+      annotations:
+        cni.projectcalico.org/ipAddrs: "[\"192.168.2.2\"]"
     spec:
       containers:
         - name: amf

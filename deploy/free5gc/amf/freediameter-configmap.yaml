@@ -25,7 +25,7 @@ data:
         freeDiameter: amf.conf
     
         s1ap:
-          addr: 192.188.2.2
+          addr: 192.168.2.2
     
         gummei: 
           plmn_id:
