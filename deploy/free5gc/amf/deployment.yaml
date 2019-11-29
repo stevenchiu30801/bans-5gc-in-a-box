@@ -33,7 +33,7 @@ spec:
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
               subPath: free5gc.conf
             - name: amf-freediameter-config
-              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/amf.conf
+              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/amf.conf
               subPath: amf.conf
       volumes:
         - name: free5gc-config

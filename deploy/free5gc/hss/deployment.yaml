@@ -29,7 +29,7 @@ spec:
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
               subPath: free5gc.conf
             - name: hss-freediameter-config
-              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/hss.conf
+              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/hss.conf
               subPath: hss.conf
       volumes:
         - name: free5gc-config
