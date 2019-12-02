@@ -101,34 +101,24 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: deploy mongo webui free5gc-config amf hss smf
+.PHONY: mongo upf deploy
 
 mongo:
-	kubectl apply -f $(DEPLOY)/mongo/persistentvolume.yaml
-	kubectl apply -f $(DEPLOY)/mongo/service.yaml
-	kubectl apply -f $(DEPLOY)/mongo/statefulset.yaml
+	kubectl apply -f $(DEPLOY)/mongo/
 
-webui:
-	kubectl apply -f $(DEPLOY)/free5gc/webui/deployment.yaml
-	kubectl apply -f $(DEPLOY)/free5gc/webui/service.yaml
+upf:
+	kubectl apply -f $(DEPLOY)/free5gc/upf/
 
-free5gc-config:
-	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
-
-amf:
-	kubectl apply -f $(DEPLOY)/free5gc/amf/freediameter-configmap.yaml
-	kubectl apply -f $(DEPLOY)/free5gc/amf/deployment.yaml
-
-hss:
-	kubectl apply -f $(DEPLOY)/free5gc/hss/freediameter-configmap.yaml
-	kubectl apply -f $(DEPLOY)/free5gc/hss/deployment.yaml
-
-smf:
-	kubectl apply -f $(DEPLOY)/free5gc/smf/freediameter-configmap.yaml
-	kubectl apply -f $(DEPLOY)/free5gc/smf/deployment.yaml
-
-deploy: $(M)/kubeadm mongo webui free5gc-config amf hss smf
+# https://www.free5gc.org/cluster
+# MongoDB should be started at first and UPF daemon should be run before SMF daemon
+deploy: $(M)/kubeadm mongo upf
+	kubectl apply -R -f $(DEPLOY)/free5gc/
 	@echo "Deployment completed!"
+
+.PHONY: reset-deploy
+
+reset-deploy:
+	kubectl delete -R -f $(DEPLOY)/free5gc/
 
 .PHONY: reset-kubeadm
 

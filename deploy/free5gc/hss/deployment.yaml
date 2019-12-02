@@ -31,6 +31,8 @@ spec:
             - name: hss-freediameter-config
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/hss.conf
               subPath: hss.conf
+          securityContext:
+            privileged: true
       volumes:
         - name: free5gc-config
           configMap: 

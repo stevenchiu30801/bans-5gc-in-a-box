@@ -1,46 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amf-deployment
+  name: upf-deployment
   labels:
-    app: amf
+    app: upf
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: amf
+      app: upf
   template:
     metadata:
       labels:
-        app: amf
+        app: upf
       annotations:
-        cni.projectcalico.org/ipAddrs: "[\"192.168.2.2\"]"
+        cni.projectcalico.org/ipAddrs: "[\"192.168.2.6\"]"
     spec:
       containers:
-        - name: amf
+        - name: upf
           image: steven30801/free5gc-build:latest
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash"]
-          args: ["-c", "/usr/src/free5gc-stage-1/free5gc-amfd"]
+          args: ["-c", "/root/setup.sh && /usr/src/free5gc-stage-1/free5gc-upfd"]
           stdin: true
           tty: true
-          ports:
-            - name: sctp
-              containerPort: 36412
-              protocol: SCTP
           volumeMounts:
             - name: free5gc-config
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
               subPath: free5gc.conf
-            - name: amf-freediameter-config
-              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/amf.conf
-              subPath: amf.conf
+            - name: tun-device
+              mountPath: /dev/net/tun
           securityContext:
             privileged: true
       volumes:
         - name: free5gc-config
-          configMap:
+          configMap: 
             name: free5gc-configmap
-        - name: amf-freediameter-config
-          configMap:
-            name: amf-freediameter-configmap
+        - name: tun-device
+          hostPath:
+            path: /dev/net/tun
+            type: File

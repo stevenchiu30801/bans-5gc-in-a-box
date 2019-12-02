@@ -1,46 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: amf-deployment
+  name: pcrf-deployment
   labels:
-    app: amf
+    app: pcrf
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: amf
+      app: pcrf
   template:
     metadata:
       labels:
-        app: amf
+        app: pcrf
       annotations:
-        cni.projectcalico.org/ipAddrs: "[\"192.168.2.2\"]"
+        cni.projectcalico.org/ipAddrs: "[\"192.168.2.5\"]"
     spec:
       containers:
-        - name: amf
+        - name: pcrf
           image: steven30801/free5gc-build:latest
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash"]
-          args: ["-c", "/usr/src/free5gc-stage-1/free5gc-amfd"]
+          args: ["-c", "/usr/src/free5gc-stage-1/nextepc-pcrfd"]
           stdin: true
           tty: true
-          ports:
-            - name: sctp
-              containerPort: 36412
-              protocol: SCTP
           volumeMounts:
             - name: free5gc-config
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
               subPath: free5gc.conf
-            - name: amf-freediameter-config
-              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/amf.conf
-              subPath: amf.conf
+            - name: pcrf-freediameter-config
+              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/pcrf.conf
+              subPath: pcrf.conf
           securityContext:
             privileged: true
       volumes:
         - name: free5gc-config
-          configMap:
+          configMap: 
             name: free5gc-configmap
-        - name: amf-freediameter-config
+        - name: pcrf-freediameter-config
           configMap:
-            name: amf-freediameter-configmap
+            name: pcrf-freediameter-configmap
