@@ -103,8 +103,13 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 
 .PHONY: mongo upf deploy
 
-mongo:
+mongo: /nfsshare
 	kubectl apply -f $(DEPLOY)/mongo/
+	until kubectl get pods --field-selector status.phase=Running | grep mongo; \
+	do \
+		echo "Waiting for mongo to be available"; \
+		sleep 5; \
+	done
 
 upf:
 	kubectl apply -f $(DEPLOY)/free5gc/upf/
@@ -118,7 +123,8 @@ deploy: $(M)/kubeadm mongo upf
 .PHONY: reset-deploy
 
 reset-deploy:
-	kubectl delete -R -f $(DEPLOY)/free5gc/
+	-kubectl delete -R -f $(DEPLOY)/free5gc/
+	-kubectl delete -f $(DEPLOY)/mongo/
 
 .PHONY: reset-kubeadm
 
