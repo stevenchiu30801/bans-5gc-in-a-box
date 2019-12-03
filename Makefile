@@ -87,6 +87,8 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	mkdir -p $(HOME)/.kube
 	sudo cp -f /etc/kubernetes/admin.conf $(HOME)/.kube/config
 	sudo chown $(shell id -u):$(shell id -g) $(HOME)/.kube/config
+	# https://docs.projectcalico.org/v3.10/getting-started/kubernetes/installation/calico
+	# To use a pod CIDR different from 192.168.0.0/16, please replace it in calico.yaml with your own
 	kubectl apply -f https://docs.projectcalico.org/v${CALICO_VERSION}/manifests/calico.yaml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 	touch $@

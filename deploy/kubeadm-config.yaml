@@ -19,4 +19,7 @@ kubernetesVersion: v1.16.0
 networking:
   dnsDomain: cluster.local
   serviceSubnet: 10.96.0.0/12
+  # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#initializing-your-control-plane-node
+  # Depending on which network add-on is used, pod network CIDR might need to be set
+  # podSubnet: 192.168.0.0/24
 scheduler: {}
