@@ -82,6 +82,9 @@ $(M)/preference: | $(M)/setup /usr/bin/kubeadm
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
+	# https://coredns.io/plugins/loop/#troubleshooting
+	# DNS forwarding loop is encoutered
+	echo "nameserver 8.8.8.8" | tee /tmp/resolv.conf
 	# sudo kubeadm init --pod-network-cidr=192.168.0.0/16
 	sudo kubeadm init --config=deploy/kubeadm-config.yaml
 	mkdir -p $(HOME)/.kube
