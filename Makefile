@@ -93,6 +93,10 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# https://docs.projectcalico.org/v3.10/getting-started/kubernetes/installation/calico
 	# To use a pod CIDR different from 192.168.0.0/16, please replace it in calico.yaml with your own
 	kubectl apply -f https://docs.projectcalico.org/v${CALICO_VERSION}/manifests/calico.yaml
+	# https://github.com/intel/multus-cni/blob/master/doc/quickstart.md
+	# -git clone https://github.com/intel/multus-cni.git /tmp/multus
+	# cat /tmp/multus/images/multus-daemonset.yml | kubectl apply -f
+	kubectl apply -f https://raw.githubusercontent.com/intel/multus-cni/master/images/multus-daemonset.yml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 	touch $@
 	@echo "Kubernetes control plane node created!"

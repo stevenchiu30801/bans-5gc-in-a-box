@@ -6,9 +6,9 @@ Bandwidth-Allocated Network Slicing on 5G Core
 
 BANS-5GC enables network slicing with specific bandwidth allocation policies on 5G core network by utilizing programmable data plane on transport network.
 
-The 5GC uses free5GC[1], an open-source 5G core network.
+The 5GC uses [free5GC](https://www.free5gc.org/), an open-source 5G core network.
 
-The programmable data plane application for bandwidth management uses a research from 2019 20th APNOMS[2].
+The programmable data plane application for bandwidth management uses a research from 2019 20th APNOMS[1].
 
 All functions are containerized and deployed on [Kubernetes](https://github.com/kubernetes/kubernetes).
 
@@ -28,16 +28,16 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 
 ### Deploy 5GC Only
 
-```
+```ShellSession
 # On Kubernetes node
 
 # Configure network environment
-$ sudo ifconfig ${ENODEB_INTF} 192.168.3.2
-$ sudo sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
+sudo ifconfig ${ENODEB_INTF} 192.168.3.2
+sudo sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
 
 
 # Deploy
-$ make free5gc
+make free5gc
 ```
 
 Configure eNodeB settings
@@ -56,6 +56,5 @@ Note: In the case that MME/AMF IP is configured to 192.168.2.2, then control pla
 The Dockerfile is referred to [open5gs/open5gs](https://github.com/open5gs/open5gs/tree/master/docker)
 
 ## Reference
-[1] [free5GC](https://www.free5gc.org/)\
-[2] [P4-Enabled Bandwidth Management](https://ieeexplore.ieee.org/abstract/document/8892909)\
-[3] [opencord/automation-tools](https://github.com/opencord/automation-tools)
+[1] [P4-Enabled Bandwidth Management](https://ieeexplore.ieee.org/abstract/document/8892909)\
+[2] [opencord/automation-tools](https://github.com/opencord/automation-tools)
