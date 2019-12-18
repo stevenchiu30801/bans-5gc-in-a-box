@@ -15,10 +15,11 @@ spec:
         app: upf
       annotations:
         cni.projectcalico.org/ipAddrs: "[\"192.168.2.6\"]"
+        k8s.v1.cni.cncf.io/networks: upf-bridge-conf
     spec:
       containers:
         - name: upf
-          image: steven30801/free5gc-build:latest
+          image: steven30801/free5gc-build:ovs-test
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash"]
           args: ["-c", "/root/setup.sh && /usr/src/free5gc-stage-1/free5gc-upfd"]

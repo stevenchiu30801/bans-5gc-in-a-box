@@ -110,7 +110,14 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: mongo upf free5gc
+.PHONY: onos mininet mongo free5gc-config upf free5gc
+
+onos:
+	kubectl apply -f $(DEPLOY)/onos/
+
+mininet:
+	cp -R $(DEPLOY)/mininet/toposcripts /tmp
+	kubectl apply -f $(DEPLOY)/mininet/
 
 mongo: /nfsshare
 	kubectl apply -f $(DEPLOY)/mongo/
@@ -120,20 +127,49 @@ mongo: /nfsshare
 		sleep 5; \
 	done
 
-upf:
+free5gc-config:
+	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
+
+upf: free5gc-config
 	kubectl apply -f $(DEPLOY)/free5gc/upf/
+	until kubectl get pods --field-selector status.phase=Running | grep upf; \
+	do \
+		echo "Waiting for upf to be available"; \
+		sleep 5; \
+	done
 
 # https://www.free5gc.org/cluster
 # MongoDB should be started at first and UPF daemon should be run before SMF daemon
-free5gc: $(M)/kubeadm mongo upf
+free5gc: $(M)/kubeadm onos mininet mongo upf
 	kubectl apply -R -f $(DEPLOY)/free5gc/
+	# https://github.com/kubernetes/kubernetes/issues/49387#issuecomment-414877972
+	# Cannot list pod status `CrashBackoffLoop`
+	until [[ -z $$(kubectl get pods --field-selector status.phase!=Running) ]]; \
+	do \
+		echo "Waiting for pods to be available"; \
+		sleep 5; \
+	done
 	@echo "Deployment completed!"
 
 .PHONY: reset-free5gc
 
 reset-free5gc:
 	-kubectl delete -R -f $(DEPLOY)/free5gc/
-	-kubectl delete -f $(DEPLOY)/mongo/
+	-kubectl delete -f $(DEPLOY)/mongo/statefulset.yaml
+	-kubectl delete pvc -l app=mongo
+	-kubectl delete -f $(DEPLOY)/mongo/service.yaml
+	-kubectl delete -f $(DEPLOY)/mininet/
+	-kubectl delete -f $(DEPLOY)/onos/
+	# https://github.com/kubernetes/kubernetes/issues/49387
+	# Currently there is no way to filter pod status `Terminating`
+	until [[ -z $$(kubectl get pods | grep Terminating) ]]; \
+	do \
+		echo "Waiting for pods to be terminated"; \
+		sleep 5; \
+	done
+	sudo rm -rf /var/lib/cni/networks/mn*
+	-for br in /sys/class/net/mn*; do sudo ip link delete `basename $$br` type bridge; done
+	@echo "Reset completed!"
 
 .PHONY: reset-kubeadm
 
@@ -142,3 +178,5 @@ reset-kubeadm:
 	rm -f $(M)/setup $(M)/kubeadm
 	-sudo kubeadm reset -f
 	sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
+	sudo rm -rf /var/lib/cni/networks/mn*
+	-for br in /sys/class/net/mn*; do sudo ip link delete `basename $$br` type bridge; done

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mininet-deployment
+  labels:
+    app: mininet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mininet
+  template:
+    metadata:
+      labels:
+        app: mininet
+      annotations:
+        k8s.v1.cni.cncf.io/networks: mn-enb-bridge-conf,mn-upf-bridge-conf
+    spec:
+      containers:
+        - name: mininet
+          image: andybavier/mininet:1.0.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/bash"]
+          args: ["-c", "chmod a+x /toposcripts/topo.py && /toposcripts/topo.py"]
+          stdin: true
+          tty: true
+          volumeMounts:
+            - name: topo-scripts
+              mountPath: /toposcripts
+          securityContext:
+            privileged: true
+      volumes:
+        - name: topo-scripts
+          hostPath:
+            path: /tmp/toposcripts
+            type: Directory

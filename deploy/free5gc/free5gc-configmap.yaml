@@ -255,7 +255,7 @@ data:
     #      name: localhost
     #
         gtpu:
-          - addr: 192.168.2.6
+          - addr: 192.168.4.2
           - addr: ::1
     
         ue_pool:

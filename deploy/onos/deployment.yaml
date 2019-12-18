@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onos-deployment
+  labels:
+    app: onos
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: onos
+  template:
+    metadata:
+      labels:
+        app: onos
+    spec:
+      containers:
+        - name: onos
+          image: onosproject/onos:1.15.0
+          imagePullPolicy: IfNotPresent
+          command: ["./bin/onos-service", "server", "debug"]
+          stdin: true
+          tty: true
+          env:
+            - name: ONOS_APPS
+              value: "drivers,openflow,fwd"
+          ports:
+            - name: openflow
+              containerPort: 6653
+            - name: ovsdb
+              containerPort: 6640
+            - name: gui
+              containerPort: 8181
+            - name: cli
+              containerPort: 8101
+            - name: intra-cluster
+              containerPort: 9876
