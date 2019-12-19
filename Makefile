@@ -157,7 +157,7 @@ reset-free5gc:
 	-kubectl delete -R -f $(DEPLOY)/free5gc/
 	-kubectl delete -f $(DEPLOY)/mongo/statefulset.yaml
 	-kubectl delete pvc -l app=mongo
-	-kubectl delete -f $(DEPLOY)/mongo/service.yaml
+	-kubectl delete -f $(DEPLOY)/mongo/
 	-kubectl delete -f $(DEPLOY)/mininet/
 	-kubectl delete -f $(DEPLOY)/onos/
 	# https://github.com/kubernetes/kubernetes/issues/49387
