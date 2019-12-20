@@ -117,6 +117,7 @@ onos:
 
 mininet:
 	cp -R $(DEPLOY)/mininet/toposcripts /tmp
+	sudo modprobe openvswitch
 	kubectl apply -f $(DEPLOY)/mininet/
 
 mongo: /nfsshare
