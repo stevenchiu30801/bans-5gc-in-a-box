@@ -24,6 +24,10 @@ networking:
   # podSubnet: 192.168.0.0/24
 scheduler: {}
 ---
+# Check the default values with `kubeadm config print init-defaults --component-configs KubeletConfiguration`
 apiVersion: kubelet.config.k8s.io/v1beta1
 kind: KubeletConfiguration
 resolvConf: /tmp/resolv.conf
+allowedUnsafeSysctls:
+  - "net.ipv4.*"
+  - "net.ipv6.*"
