@@ -110,7 +110,7 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: mongo upf free5gc
+.PHONY: mongo free5gc-config upf free5gc
 
 mongo: /nfsshare
 	kubectl apply -f $(DEPLOY)/mongo/
@@ -120,20 +120,41 @@ mongo: /nfsshare
 		sleep 5; \
 	done
 
-upf:
+free5gc-config:
+	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
+
+upf: free5gc-config
 	kubectl apply -f $(DEPLOY)/free5gc/upf/
+	until kubectl get pods --field-selector status.phase=Running | grep upf; \
+	do \
+		echo "Waiting for upf to be available"; \
+		sleep 5; \
+	done
 
 # https://www.free5gc.org/cluster
 # MongoDB should be started at first and UPF daemon should be run before SMF daemon
 free5gc: $(M)/kubeadm mongo upf
 	kubectl apply -R -f $(DEPLOY)/free5gc/
+	until [[ -z $$(kubectl get pods --field-selector status.phase!=Running) ]]; \
+	do \
+		echo "Waiting for pods to be available"; \
+		sleep 5; \
+	done
 	@echo "Deployment completed!"
 
 .PHONY: reset-free5gc
 
 reset-free5gc:
 	-kubectl delete -R -f $(DEPLOY)/free5gc/
+	-kubectl delete -f $(DEPLOY)/mongo/statefulset.yaml
+	-kubectl delete pvc -l app=mongo
 	-kubectl delete -f $(DEPLOY)/mongo/
+	until [[ -z $$(kubectl get pods | grep Terminating) ]]; \
+	do \
+		echo "Waiting for pods to be terminated"; \
+		sleep 5; \
+	done
+	@echo "Reset completed!"
 
 .PHONY: reset-kubeadm
 
