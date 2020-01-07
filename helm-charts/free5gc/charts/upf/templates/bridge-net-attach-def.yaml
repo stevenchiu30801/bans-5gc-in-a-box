@@ -1,0 +1,23 @@
+{{- if .Values.enableMininet }}
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: upf-bridge-conf
+  annotations:
+    "helm.sh/hook-weight": "5"
+spec:
+  config: '{
+    "name": "mn2",
+    "type": "bridge",
+    "bridge": "mn2",
+    "ipam": {
+      "type": "host-local",
+      "subnet": "{{ .Values.gtpu.subnet }}"
+    },
+    "args": {
+      "cni": {
+        "ips": ["{{ .Values.gtpu.addr }}"]
+      }
+    }
+  }'
+{{- end }}
