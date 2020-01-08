@@ -7,7 +7,7 @@ metadata:
     "helm.sh/hook": pre-install
 data:
   free5gc.conf: |
-    db_uri: {{ .Values.dbUri }}
+    db_uri: {{ .Values.global.dbUri }}
     
     logger:
         file: /usr/src/free5gc-stage-1/install/var/log/free5gc/free5gc.log

@@ -1,4 +1,4 @@
-{{- if .Values.enableMininet }}
+{{- if .Values.global.enableMininet }}
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:

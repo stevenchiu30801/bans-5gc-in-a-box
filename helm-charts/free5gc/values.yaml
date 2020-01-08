@@ -3,26 +3,8 @@
 # Declare variables to be passed into your templates.
 
 global:
-  replicaCount: 1
-
-  image:
-    repository: steven30801/free5gc-build
-    tag: latest
-    pullPolicy: IfNotPresent
-
-  imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
-
-  resources: {}
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
-dbUri: mongodb://mongo-service.default.svc.cluster.local/free5gc
+  dbUri: mongodb://mongo.default.svc.cluster.local/free5gc
+  enableMininet: false
 
 amf:
   s1ap:
@@ -40,5 +22,3 @@ upf:
   gtpu:
     subnet: 192.168.2.0/24
     addr: 192.168.2.6
-
-enableMininet: false

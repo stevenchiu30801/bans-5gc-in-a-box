@@ -1,20 +1,19 @@
-# Refer to https://kubernetes.io/blog/2017/01/running-mongodb-on-kubernetes-with-statefulsets/
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
-  name: {{ include "mongo.fullname" . }}
+  name: {{ include "webui.fullname" . }}
+  labels:
+    {{- include "webui.labels" . | nindent 4 }}
 spec:
-  serviceName: {{ include "mongo.fullname" . }}
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "mongo.selectorLabels" . | nindent 6 }}
+      {{- include "webui.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "mongo.selectorLabels" . | nindent 8 }}
+        {{- include "webui.selectorLabels" . | nindent 8 }}
     spec:
-      terminationGracePeriodSeconds: 10
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -23,15 +22,13 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command:
-            - mongod
-            - "--bind_ip_all"
           ports:
-            - name: db
-              containerPort: {{ .Values.service.db.port }}
-          volumeMounts:
-            - name: mongo-persistent-storage
-              mountPath: /data/db
+            - name: webui
+              containerPort: {{ .Values.service.webui.port }}
+              protocol: TCP
+          env:
+            - name: DB_URI
+              value: {{ .Values.global.dbUri }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -46,12 +43,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-persistent-storage
-      spec:
-        accessModes:
-          - ReadWriteMany
-        resources:
-          requests:
-            storage: 5Gi

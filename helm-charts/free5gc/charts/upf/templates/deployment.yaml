@@ -17,7 +17,7 @@ spec:
         {{- include "upf.selectorLabels" . | nindent 8 }}
       annotations:
         cni.projectcalico.org/ipAddrs: "[\"{{ .Values.pfcp.addr }}\"]"
-{{- if .Values.enableMininet }}
+{{- if .Values.global.enableMininet }}
         k8s.v1.cni.cncf.io/networks: upf-bridge-conf
 {{- end }}
     spec:

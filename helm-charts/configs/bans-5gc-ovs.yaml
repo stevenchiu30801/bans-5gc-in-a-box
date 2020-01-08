@@ -1,3 +1,7 @@
+# global
+global:
+  enableMininet: true
+
 # in free5gc chart
 amf:
   s1ap:
@@ -15,9 +19,6 @@ upf:
   gtpu:
     subnet: 192.168.4.0/24
     addr: 192.168.4.2
-
-# in free5gc and mininet chart
-enableMininet: true
 
 # in mininet and onos chart
 bandwidthManagement: false
