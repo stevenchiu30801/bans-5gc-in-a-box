@@ -79,6 +79,5 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: <<-SHELL
     apt-get update
     apt-get install -y make
-    cd /proc/sys/net/bridge && for f in bridge-nf-*; do echo 0 > $f; done
   SHELL
 end
