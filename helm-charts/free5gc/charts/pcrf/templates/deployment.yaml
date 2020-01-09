@@ -1,25 +1,20 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "upf.fullname" . }}
+  name: {{ include "pcrf.fullname" . }}
   labels:
-    {{- include "upf.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/hook-weight": "-5"
+    {{- include "pcrf.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "upf.selectorLabels" . | nindent 6 }}
+      {{- include "pcrf.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "upf.selectorLabels" . | nindent 8 }}
+        {{- include "pcrf.selectorLabels" . | nindent 8 }}
       annotations:
-        cni.projectcalico.org/ipAddrs: "[\"{{ .Values.pfcp.addr }}\"]"
-{{- if .Values.global.enableMininet }}
-        k8s.v1.cni.cncf.io/networks: upf-bridge-conf
-{{- end }}
+        cni.projectcalico.org/ipAddrs: "[\"{{ .Values.addr }}\"]"
     spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -30,25 +25,25 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/bash"]
-          args: ["-c", "/root/setup.sh && /usr/src/free5gc-stage-1/free5gc-upfd"]
+          args: ["-c", "/usr/src/free5gc-stage-1/nextepc-pcrfd"]
           stdin: true
           tty: true
           volumeMounts:
             - name: free5gc-config
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
               subPath: free5gc.conf
-            - name: tun-device
-              mountPath: /dev/net/tun
+            - name: pcrf-freediameter-config
+              mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/freeDiameter/pcrf.conf
+              subPath: pcrf.conf
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: free5gc-config
           configMap: 
             name: free5gc-configmap
-        - name: tun-device
-          hostPath:
-            path: /dev/net/tun
-            type: File
+        - name: pcrf-freediameter-config
+          configMap:
+            name: pcrf-freediameter-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

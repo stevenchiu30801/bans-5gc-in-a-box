@@ -73,7 +73,7 @@ data:
     #      dev: eth0
     #
         s1ap:
-          addr: {{ .Values.amf.s1ap.addr }}
+          addr: {{ .Values.amf.addr }}
     
     #
     #  <GUMMEI>
@@ -164,14 +164,14 @@ data:
         freeDiameter: smf.conf
     
         pfcp:
-          - addr: {{ .Values.smf.pfcp.addr }}
+          - addr: {{ .Values.smf.addr }}
           - addr: ::1
     
         upf:
           - addr: {{ .Values.upf.pfcp.addr }}
     
         http:
-          addr: {{ .Values.smf.http.addr }}
+          addr: {{ .Values.smf.addr }}
           port: 8080
     
     #

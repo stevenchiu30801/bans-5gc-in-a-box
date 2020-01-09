@@ -1,4 +1,4 @@
-# Default values for upf.
+# Default values for smf.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -13,15 +13,11 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-pfcp:
-  addr: 192.168.2.6
-gtpu:
-  addr: 192.168.2.6
+addr: 192.168.2.4
 
 podSecurityContext: {}
 
-securityContext: 
-  privileged: true
+securityContext: {}
 
 resources: {}
 

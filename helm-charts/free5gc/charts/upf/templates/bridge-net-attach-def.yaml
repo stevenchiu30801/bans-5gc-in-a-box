@@ -12,7 +12,13 @@ spec:
     "bridge": "mn2",
     "ipam": {
       "type": "host-local",
-      "subnet": "{{ .Values.gtpu.subnet }}"
+      "subnet": "{{ .Values.global.mnUpfBridge.subnet }}",
+      "routes": [
+        {
+          "dst": "{{ .Values.enbSubnet }}",
+          "gw": "{{ .Values.global.mnEnbBridge.gateway }}"
+        }
+      ]
     },
     "args": {
       "cni": {
