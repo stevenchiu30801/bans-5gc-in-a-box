@@ -41,15 +41,9 @@ make free5gc
 ```
 
 Configure eNodeB settings
-- IP address 192.168.3.3
+- IP address in subnet 192.168.3.0/24 (excluding 192.168.3.2)
 - Gateway/Router 192.168.3.2
-- MME/AMF IP 192.168.2.2 or 192.168.3.2
-
-Note: In the case that MME/AMF IP is configured to 192.168.2.2, then control plane packets would take the interface of Kubernetes node as gateway and be forwarded with routing table. In another case, AMF pod would receive control plane packets by the Kubernetes service, `deploy/free5gc/amf/service.yaml`.
-
-### Deploy BANS-5GC
-
-(WIP)
+- MME/AMF IP 192.168.2.2
 
 ## Dockerfile
 
