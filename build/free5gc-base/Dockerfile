@@ -27,8 +27,7 @@ RUN apt-get update && \
         ca-certificates \
         netbase \
         pkg-config \
-        iptables \
-        net-tools && \
+        iptables && \
     apt-get clean
 
 RUN go get -u -v "github.com/gorilla/mux"

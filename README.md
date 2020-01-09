@@ -26,7 +26,7 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 
 ## Usage
 
-### Deploy 5GC Only
+### Deploy 5GC with SDN-based Transport
 
 ```ShellSession
 # On Kubernetes node

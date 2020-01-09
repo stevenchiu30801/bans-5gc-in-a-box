@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: upf
-          image: steven30801/free5gc-build:ovs-test
+          image: steven30801/free5gc-build:latest
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash"]
           args: ["-c", "/root/setup.sh && /usr/src/free5gc-stage-1/free5gc-upfd"]

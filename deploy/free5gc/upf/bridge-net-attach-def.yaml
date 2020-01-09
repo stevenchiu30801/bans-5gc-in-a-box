@@ -9,7 +9,13 @@ spec:
     "bridge": "mn2",
     "ipam": {
       "type": "host-local",
-      "subnet": "192.168.4.0/24"
+      "subnet": "192.168.4.0/24",
+      "routes": [
+        {
+          "dst": "192.168.3.0/24",
+          "gw": "192.168.4.1"
+        }
+      ]
     },
     "args": {
       "cni": {
