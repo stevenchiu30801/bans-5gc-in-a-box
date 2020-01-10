@@ -1,0 +1,34 @@
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: mn-enb-bridge-conf
+spec:
+  config: '{
+    "name": "mn1",
+    "type": "bridge",
+    "bridge": "mn1",
+    "isDefaultGateway": true,
+    "ipam": {
+{{- range $key, $val := .Values.global.mnEnbBridge }}
+      {{ $key | quote }}: {{ $val | quote }},
+{{- end }}
+      "type": "host-local"
+    }
+  }'
+---
+apiVersion: "k8s.cni.cncf.io/v1"
+kind: NetworkAttachmentDefinition
+metadata:
+  name: mn-upf-bridge-conf
+spec:
+  config: '{
+    "name": "mn2",
+    "type": "bridge",
+    "bridge": "mn2",
+    "ipam": {
+{{- range $key, $val := .Values.global.mnUpfBridge }}
+      {{ $key | quote }}: {{ $val | quote }},
+{{- end }}
+      "type": "host-local"
+    }
+  }'

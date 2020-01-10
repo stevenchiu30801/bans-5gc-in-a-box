@@ -42,3 +42,6 @@ upf:
 
 # in mininet and onos chart
 bandwidthManagement: false
+
+# in mininet chart
+topo: topo.py
