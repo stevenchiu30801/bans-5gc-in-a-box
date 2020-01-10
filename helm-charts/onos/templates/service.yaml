@@ -1,0 +1,25 @@
+{{- range $key, $val := .Values.service }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+{{- with $ }}
+  name: {{ include "onos.fullname" . }}-{{ $key }}
+  labels:
+    {{- include "onos.labels" . | nindent 4 }}
+{{- end }}
+spec:
+  type: {{ $val.type }}
+  ports:
+    - name: {{ $key }}
+      port: {{ $val.port }}
+{{- if $val.targetPort }}
+      targetPort: {{ $val.targetPort }}
+{{- else if $val.nodePort }}
+      nodePort: {{ $val.nodePort }}
+{{- end }}
+{{- with $ }}
+  selector:
+    {{- include "onos.selectorLabels" . | nindent 4 }}
+{{- end }}
+{{- end }}

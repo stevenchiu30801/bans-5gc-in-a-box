@@ -1,0 +1,56 @@
+# Default values for onos.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: onosproject/onos
+  tag: 1.15.0
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  openflow:
+    type: NodePort
+    port: 6653
+    nodePort: 30653
+
+  ovsdb:
+    type: ClusterIP
+    port: 6640
+    targetPort: 6640
+
+  gui:
+    type: NodePort
+    port: 8181
+    nodePort: 30181
+
+  cli:
+    type: NodePort
+    port: 8101
+    nodePort: 30101
+
+  intra-cluster:
+    type: ClusterIP
+    port: 9876
+    targetPort: 9876
+
+env:
+  - name: ONOS_APPS
+    value: "drivers,openflow,fwd"
+
+podSecurityContext: {}
+
+securityContext: {}
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
