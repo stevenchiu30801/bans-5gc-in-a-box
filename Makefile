@@ -2,7 +2,7 @@ SHELL	:= /bin/bash
 MAKEDIR	:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD	?= $(MAKEDIR)/tmp
 M		?= $(BUILD)/milestones
-DEPLOY	?= $(MAKEDIR)/deploy
+HELMDIR	?= $(MAKEDIR)/helm-charts
 
 # 18.06.2~ce~3-0~ubuntu in Kubernetes document
 DOCKER_VERSION	?= 18.06.2
@@ -15,9 +15,16 @@ CALICOCTL_VERSION	?= 3.8.5
 HELM_VERSION	?= 3.0.0
 HELM_PLATFORM	?= linux-amd64
 
+HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
+
 # Targets
-cluster: $(M)/kubeadm
-install: /usr/bin/kubeadm /usr/local/bin/helm /usr/local/bin/calicoctl
+bans-5gc: free5gc
+
+bans-5gc-ovs: HELMVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
+bans-5gc-ovs: onos mininet free5gc
+
+cluster: $(M)/kubeadm /usr/local/bin/helm
+install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
 
 $(M)/setup:
@@ -131,57 +138,29 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# showmount -e localhost
 	sudo mkdir /nfsshare
 
-.PHONY: onos mininet mongo free5gc-config upf free5gc
+.PHONY: onos mininet mongo free5gc
 
-onos:
-	kubectl apply -f $(DEPLOY)/onos/
+onos: $(M)/kubeadm /usr/local/bin/helm
+	helm upgrade --install --wait -f $(HELMVALUES) onos $(HELMDIR)/onos
 
-mininet:
-	cp -R $(DEPLOY)/mininet/toposcripts /tmp
-	sudo modprobe openvswitch
-	kubectl apply -f $(DEPLOY)/mininet/
+mininet: $(M)/kubeadm /usr/local/bin/helm
+	helm upgrade --install --wait -f $(HELMVALUES) mininet $(HELMDIR)/mininet
 
-mongo: /nfsshare
-	kubectl apply -f $(DEPLOY)/mongo/
-	until kubectl get pods --field-selector status.phase=Running | grep mongo; \
-	do \
-		echo "Waiting for mongo to be available"; \
-		sleep 5; \
-	done
-
-free5gc-config:
-	kubectl apply -f $(DEPLOY)/free5gc/free5gc-configmap.yaml
-
-upf: free5gc-config
-	kubectl apply -f $(DEPLOY)/free5gc/upf/
-	until kubectl get pods --field-selector status.phase=Running | grep upf; \
-	do \
-		echo "Waiting for upf to be available"; \
-		sleep 5; \
-	done
+mongo: $(M)/kubeadm /usr/local/bin/helm /nfsshare
+	helm upgrade --install --wait -f $(HELMVALUES) mongo $(HELMDIR)/mongo
 
 # https://www.free5gc.org/cluster
-# MongoDB should be started at first and UPF daemon should be run before SMF daemon
-free5gc: $(M)/kubeadm onos mininet mongo upf
-	kubectl apply -R -f $(DEPLOY)/free5gc/
-	# https://github.com/kubernetes/kubernetes/issues/49387#issuecomment-414877972
-	# Cannot list pod status `CrashBackoffLoop`
-	until [[ -z $$(kubectl get pods --field-selector status.phase!=Running) ]]; \
-	do \
-		echo "Waiting for pods to be available"; \
-		sleep 5; \
-	done
+free5gc: $(M)/kubeadm /usr/local/bin/helm mongo
+	helm upgrade --install --wait -f $(HELMVALUES) free5gc $(HELMDIR)/free5gc
 	@echo "Deployment completed!"
 
 .PHONY: reset-free5gc
 
 reset-free5gc:
-	-kubectl delete -R -f $(DEPLOY)/free5gc/
-	-kubectl delete -f $(DEPLOY)/mongo/statefulset.yaml
-	-kubectl delete pvc -l app=mongo
-	-kubectl delete -f $(DEPLOY)/mongo/
-	-kubectl delete -f $(DEPLOY)/mininet/
-	-kubectl delete -f $(DEPLOY)/onos/
+	-helm uninstall onos
+	-helm uninstall mininet
+	helm uninstall free5gc
+	sleep 1
 	# https://github.com/kubernetes/kubernetes/issues/49387
 	# Currently there is no way to filter pod status `Terminating`
 	until [[ -z $$(kubectl get pods | grep Terminating) ]]; \

@@ -1,0 +1,31 @@
+# global
+global:
+  freediameter:
+    amf:
+      addr: 192.168.2.2
+    hss:
+      addr: 192.168.2.3
+    smf:
+      addr: 192.168.2.4
+    pcrf:
+      addr: 192.168.2.5
+  enableMininet: false
+
+# in free5gc chart
+amf:
+  addr: 192.168.2.2
+
+hss:
+  addr: 192.168.2.3
+
+smf:
+  addr: 192.168.2.4
+
+pcrf:
+  addr: 192.168.2.5
+
+upf:
+  pfcp:
+    addr: 192.168.2.6
+  gtpu:
+    addr: 192.168.2.6
