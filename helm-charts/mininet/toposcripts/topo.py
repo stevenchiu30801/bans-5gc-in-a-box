@@ -23,8 +23,6 @@ class MinimalTopo(Topo):
 if __name__ == '__main__':
     setLogLevel( 'info' )
 
-    print quietRun( 'service openvswitch-switch start' )
-
     topo = MinimalTopo()
     net = Mininet( topo=topo, controller=None )
 

@@ -24,8 +24,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ["/bin/bash"]
-          args: ["-c", "/toposcripts/{{ .Values.topo }}"]
+          args: ["/toposcripts/{{ .Values.topo }}"]
           stdin: true
           tty: true
           volumeMounts:
