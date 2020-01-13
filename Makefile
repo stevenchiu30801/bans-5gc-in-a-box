@@ -2,6 +2,7 @@ SHELL	:= /bin/bash
 MAKEDIR	:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD	?= $(MAKEDIR)/tmp
 M		?= $(BUILD)/milestones
+DEPLOY	?= $(MAKEDIR)/deploy
 HELMDIR	?= $(MAKEDIR)/helm-charts
 
 # 18.06.2~ce~3-0~ubuntu in Kubernetes document
