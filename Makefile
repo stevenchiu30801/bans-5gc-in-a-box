@@ -33,6 +33,7 @@ $(M)/setup:
 	sudo swapoff -a
 	# To remain swap disabled after reboot
 	# sudo sed -i '/ swap / s/^\(.*\)$$/#\1/g' /etc/fstab
+	sudo modprobe openvswitch
 	mkdir -p $(M)
 	touch $@
 
