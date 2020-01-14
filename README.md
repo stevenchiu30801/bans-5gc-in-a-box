@@ -26,7 +26,7 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 
 ## Usage
 
-### Deploy 5GC Only
+### Setup
 
 ```ShellSession
 # On Kubernetes node
@@ -34,16 +34,37 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 # Configure network environment
 sudo ifconfig ${ENODEB_INTF} 192.168.3.2
 sudo sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
-
-
-# Deploy
-make free5gc
 ```
 
 Configure eNodeB settings
 - IP address in subnet 192.168.3.0/24 (excluding 192.168.3.2)
 - Gateway/Router 192.168.3.2
 - MME/AMF IP 192.168.2.2
+
+### Deploying 5GC Only
+
+```ShellSession
+# Deploy
+make
+
+# or
+make bans-5gc
+```
+
+### Deploying 5GC with SDN-based Transport
+
+A OvS-based Mininet pod is placed between eNodeB and UPF pod.
+
+Open vSwitches are controlled by [ONOS](https://github.com/opennetworkinglab/onos).
+
+```ShellSession
+# Deploy
+make bans-5gc-ovs
+```
+
+### Customizing Configuration
+
+Configuration files for deployment locate in `helm-charts/configs`.
 
 ## Dockerfile
 
