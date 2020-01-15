@@ -2,6 +2,7 @@ SHELL	:= /bin/bash
 MAKEDIR	:= $(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 BUILD	?= $(MAKEDIR)/tmp
 M		?= $(BUILD)/milestones
+R		?= /tmp
 DEPLOY	?= $(MAKEDIR)/deploy
 HELMDIR	?= $(MAKEDIR)/helm-charts
 
@@ -16,13 +17,15 @@ CALICOCTL_VERSION	?= 3.8.5
 HELM_VERSION	?= 3.0.0
 HELM_PLATFORM	?= linux-amd64
 
+GO_VERSION	?= 1.13.5
+
 HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
 
 # Targets
 bans-5gc: free5gc
 
 bans-5gc-ovs: HELMVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
-bans-5gc-ovs: onos mininet free5gc
+bans-5gc-ovs: $(M)/cluster-setup $(M)/multus-init onos mininet free5gc
 
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
@@ -38,7 +41,7 @@ $(M)/setup:
 	touch $@
 
 # https://kubernetes.io/docs/setup/production-environment/container-runtimes/#docker
-/usr/bin/docker: | $(M)/setup
+/usr/bin/docker:
 	sudo apt-get update
 	sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
 	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
@@ -60,7 +63,7 @@ $(M)/setup:
 	# sudo systemctl restart docker
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/#installing-kubeadm-kubelet-and-kubectl
-/usr/bin/kubeadm: | $(M)/setup /usr/bin/docker
+/usr/bin/kubeadm: | /usr/bin/docker
 	sudo apt-get update
 	sudo apt-get install -y apt-transport-https curl
 	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
@@ -75,7 +78,7 @@ $(M)/setup:
 	# sudo systemctl restart kubelet
 
 # https://helm.sh/docs/intro/install/#from-the-binary-releases
-/usr/local/bin/helm: | $(M)/setup
+/usr/local/bin/helm:
 	curl -L -o ${BUILD}/helm.tgz https://get.helm.sh/helm-v${HELM_VERSION}-${HELM_PLATFORM}.tar.gz
 	cd ${BUILD}; tar -zxvf helm.tgz
 	sudo mv ${BUILD}/${HELM_PLATFORM}/helm $@
@@ -83,7 +86,7 @@ $(M)/setup:
 	rm -r ${BUILD}/helm.tgz ${BUILD}/${HELM_PLATFORM}
 
 # https://docs.projectcalico.org/v3.10/getting-started/calicoctl/install
-/usr/local/bin/calicoctl: | $(M)/setup
+/usr/local/bin/calicoctl:
 	curl -O -L  https://github.com/projectcalico/calicoctl/releases/download/v${CALICOCTL_VERSION}/calicoctl
 	sudo chmod +x calicoctl
 	sudo chown root:root calicoctl
@@ -96,6 +99,37 @@ $(M)/setup:
 	spec:\n\
 	  datastoreType: \"kubernetes\"\n\
 	  kubeconfig: \"/etc/kubernetes/admin.conf\"" | sudo tee /etc/calico/calicoctl.cfg
+
+# https://golang.org/doc/install#install
+/usr/local/go:
+	curl -O -L https://dl.google.com/go/go${GO_VERSION}.linux-amd64.tar.gz
+	sudo tar -C /usr/local -xzf go${GO_VERSION}.linux-amd64.tar.gz
+	echo -e '\nexport PATH=$$PATH:/usr/local/go/bin' >> $(HOME)/.profile
+	rm go${GO_VERSION}.linux-amd64.tar.gz
+	@echo -e "Please reload your shell or source $$HOME/.profile to apply the changes:\n\
+		source $$HOME/.profile"
+
+.PHONY: cni-plugins-update
+
+# https://github.com/containernetworking/plugins
+cni-plugins-update: | /usr/local/go
+	-git clone https://github.com/containernetworking/plugins $(R)/plugins
+	cd $(R)/plugins; git pull
+	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/plugins; ./build_linux.sh
+	mkdir -p /opt/cni/bin
+	sudo cp $(R)/plugins/bin/* /opt/cni/bin
+
+# https://github.com/intel/sriov-cni.git
+/opt/cni/bin/sriov: | /usr/local/go
+	-git clone https://github.com/intel/sriov-cni.git $(R)/sriov-cni
+	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-cni; make
+	mkdir -p /opt/cni/bin
+	sudo cp $(R)/sriov-cni/build/sriov $@
+
+# https://github.com/intel/sriov-network-device-plugin
+$(R)/sriov-network-device-plugin/build/sriovdp: | /usr/local/go
+	-git clone https://github.com/intel/sriov-network-device-plugin.git $(R)/sriov-network-device-plugin
+	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-network-device-plugin; make
 
 $(M)/preference: | /usr/bin/kubeadm /usr/local/bin/helm
 	# https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion
@@ -123,13 +157,25 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	# https://docs.projectcalico.org/v3.10/getting-started/kubernetes/installation/calico
 	# To use a pod CIDR different from 192.168.0.0/16, please replace it in calico.yaml with your own
 	kubectl apply -f https://docs.projectcalico.org/v${CALICO_VERSION}/manifests/calico.yaml
-	# https://github.com/intel/multus-cni/blob/master/doc/quickstart.md
-	# -git clone https://github.com/intel/multus-cni.git /tmp/multus
-	# cat /tmp/multus/images/multus-daemonset.yml | kubectl apply -f
-	kubectl apply -f https://raw.githubusercontent.com/intel/multus-cni/master/images/multus-daemonset.yml
 	kubectl taint nodes --all node-role.kubernetes.io/master-
 	touch $@
 	@echo "Kubernetes control plane node created!"
+
+# https://github.com/intel/multus-cni/blob/master/doc/quickstart.md
+$(M)/multus-init: | $(M)/kubeadm
+	# -git clone https://github.com/intel/multus-cni.git $(R)/multus
+	# cat $(R)/multus/images/multus-daemonset.yml | kubectl apply -f
+	kubectl apply -f https://raw.githubusercontent.com/intel/multus-cni/master/images/multus-daemonset.yml
+	touch $@
+
+# https://github.com/intel/sriov-network-device-plugin
+$(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp
+	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/configMap.yaml
+	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/k8s-v1.16/sriovdp-daemonset.yaml
+	touch $@
+
+$(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
+	touch $@
 
 /nfsshare:
 	sudo apt update
@@ -142,26 +188,26 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 
 .PHONY: onos mininet mongo free5gc
 
-onos: $(M)/kubeadm /usr/local/bin/helm
+onos: $(M)/cluster-setup
 	helm upgrade --install --wait -f $(HELMVALUES) onos $(HELMDIR)/onos
 
-mininet: $(M)/kubeadm /usr/local/bin/helm
+mininet: $(M)/cluster-setup
 	helm upgrade --install --wait -f $(HELMVALUES) mininet $(HELMDIR)/mininet
 
-mongo: $(M)/kubeadm /usr/local/bin/helm /nfsshare
+mongo: $(M)/cluster-setup /nfsshare
 	helm upgrade --install --wait -f $(HELMVALUES) mongo $(HELMDIR)/mongo
 
 # https://www.free5gc.org/cluster
-free5gc: $(M)/kubeadm /usr/local/bin/helm mongo
+free5gc: $(M)/cluster-setup mongo
 	helm upgrade --install --wait -f $(HELMVALUES) free5gc $(HELMDIR)/free5gc
 	@echo "Deployment completed!"
 
 .PHONY: reset-free5gc
 
-reset-free5gc:
+reset-bans5gc:
 	-helm uninstall onos
 	-helm uninstall mininet
-	helm uninstall free5gc
+	-helm uninstall free5gc
 	sleep 1
 	# https://github.com/kubernetes/kubernetes/issues/49387
 	# Currently there is no way to filter pod status `Terminating`
@@ -178,8 +224,8 @@ reset-free5gc:
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tear-down
 reset-kubeadm:
-	rm -f $(M)/setup $(M)/kubeadm
 	-sudo kubeadm reset -f
 	sudo iptables -F && sudo iptables -t nat -F && sudo iptables -t mangle -F && sudo iptables -X
 	sudo rm -rf /var/lib/cni/networks/mn*
 	-for br in /sys/class/net/mn*; do sudo ip link delete `basename $$br` type bridge; done
+	rm -f $(M)/setup $(M)/kubeadm $(M)/multus-init $(M)/sriov-init $(M)/cluster-setup
