@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+
+export ONOS_WEB_USER=onos
+export ONOS_WEB_PASS=rocks
+
+if [ $# -ne 0 ]; then
+    # If the first argument is an absolute file path then execute the file passing
+    # it the reset of the arguments
+    if [[ $1 =~ ^/ ]]; then
+        exec mn $@
+
+    # If the first argument looks like an argument then execute mininet with all the
+    # arguments
+    elif [[ $1 =~ ^- ]]; then
+        exec mn $@
+    fi
+
+# If no argument or an unknown argument provided, execute mininet with a minimal
+# topology
+else
+    exec mn --custom bmv2.py --switch onosbmv2 --controller remote
+fi
