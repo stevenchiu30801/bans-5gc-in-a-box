@@ -21,7 +21,8 @@ set -e
 BUILD_DIR=~/p4tools
 # in case BMV2_COMMIT value is updated, the same variable in
 # protocols/bmv2/thrift-api/BUCK file should also be updated
-BMV2_COMMIT="ae87b4d4523488ac935133b4aef437796ad1bbd1"
+# BMV2_COMMIT="ae87b4d4523488ac935133b4aef437796ad1bbd1"
+BMV2_COMMIT="fdbff8f86e401a49a44dad899c51bcfcad84ff9f"
 PI_COMMIT="539e4624f16aac39f8890a6dfb11c65040e735ad"
 P4C_COMMIT="380830f6c26135d1d65e1312e3ba2da628c18145"
 PROTOBUF_COMMIT="tags/v3.2.0"
@@ -241,7 +242,8 @@ function do_sysrepo {
 function checkout_bmv2 {
     cd ${BUILD_DIR}
     if [ ! -d bmv2 ]; then
-        git clone https://github.com/p4lang/behavioral-model.git bmv2
+        # git clone https://github.com/p4lang/behavioral-model.git bmv2
+        git clone https://github.com/stevenchiu30801/behavioral-model.git bmv2
     fi
     cd bmv2
     git fetch
