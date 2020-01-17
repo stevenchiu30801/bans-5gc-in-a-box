@@ -105,10 +105,10 @@ $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
 	sudo apt update
 	sudo apt install -y nfs-kernel-server
 	echo "/nfsshare   localhost(rw,sync,no_root_squash)" | sudo tee /etc/exports
+	sudo mkdir /nfsshare
 	sudo exportfs -r
 	# Check if /etc/exports is properly loaded
 	# showmount -e localhost
-	sudo mkdir /nfsshare
 
 .PHONY: mongo free5gc-config upf free5gc
 
