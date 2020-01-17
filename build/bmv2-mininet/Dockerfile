@@ -27,7 +27,7 @@ COPY install-p4-tools.sh .
 RUN chmod 777 ./install-p4-tools.sh && \
     ./install-p4-tools.sh
 
-COPY bmv2.py .
+COPY bmv2.py /toposcripts
 
 RUN sed -i "s/@alias(\"intrinsic_metadata.egress_rid\")    bit<16> egress_rid;/@alias(\"intrinsic_metadata.egress_rid\")    bit<16> egress_rid;\n    @alias(\"intrinsic_metadata.priority\")      bit<3> priority;/g" /usr/local/share/p4c/p4include/v1model.p4
 
