@@ -9,3 +9,7 @@ RUN apt-get update && \
     apt-get install -y curl
 
 COPY onos-app .
+
+RUN chmod +x onos-app
+
+ENTRYPOINT ["./onos-app"]
