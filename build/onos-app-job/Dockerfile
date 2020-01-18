@@ -8,7 +8,7 @@ WORKDIR /root
 RUN apt-get update && \
     apt-get install -y curl
 
-COPY onos-app .
+COPY onos-app _find-node _rest-port ./
 
 RUN chmod +x onos-app
 
