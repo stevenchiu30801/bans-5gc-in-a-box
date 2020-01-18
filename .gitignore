@@ -1,3 +1,9 @@
+# temporary files in deployment
 tmp/
+
+# vagrant
 .vagrant/
 *.log
+
+# private onos apps
+helm-charts/onos-app/oars/*

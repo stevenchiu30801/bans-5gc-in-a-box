@@ -21,11 +21,19 @@ GO_VERSION	?= 1.13.5
 
 HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
 
+# oars
+BASIC_PIPELINE_APP	?= org.onosproject.pipelines.basic
+BMV2_DRIVER_APP		?= org.onosproject.drivers.bmv2
+BW_MGNT_APP			?= org.onosproject.bandwidth-management
+
 # Targets
 bans-5gc: free5gc
 
 bans-5gc-ovs: HELMVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
 bans-5gc-ovs: $(M)/cluster-setup $(M)/multus-init onos mininet free5gc
+
+bans-5gc-bmv2: HELMVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
+bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bans-setup free5gc
 
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
@@ -184,7 +192,29 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 	sudo exportfs -r
 	# Check if /etc/exports is properly loaded
 	# showmount -e localhost
-	sudo mkdir /nfsshare
+	sudo mkdir $@
+
+.PHONY: bans-setup bmv2-app bw-mgnt-app bw-mgnt-slice
+
+bans-setup: onos bmv2-app mininet #bw-mgnt-app bw-mgnt-slice
+
+/tmp/oars:
+	mkdir -p $@
+	cp $(HELMDIR)/onos-app/oars/* $@
+
+bmv2-app: /tmp/oars
+	# Uninstall original basic pipelines
+	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=uninstall --set appName=$(BASIC_PIPELINE_APP) uninstall-basic-pipelines $(HELMDIR)/onos-app
+	# Install basic pipelines for bandwidth management
+	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BASIC_PIPELINE_APP).oar install-basic-pipelines $(HELMDIR)/onos-app
+	# Since BMv2 driver depends on basic pipelines, uninstallation of basic pipelines would remove it as well
+	# Reinstall BMv2 driver
+	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BMV2_DRIVER_APP).oar install-bmv2-driver $(HELMDIR)/onos-app
+
+bw-mgnt-app: /tmp/oars
+	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BW_MGNT_APP).oar install-bw-mgnt $(HELMDIR)/onos-app
+
+bw-mgnt-slice:
 
 .PHONY: onos mininet mongo free5gc
 
@@ -205,6 +235,10 @@ free5gc: $(M)/cluster-setup mongo
 .PHONY: reset-free5gc
 
 reset-bans5gc:
+	-helm uninstall uninstall-basic-pipelines
+	-helm uninstall install-basic-pipelines
+	-helm uninstall install-bmv2-driver
+	-helm uninstall install-bw-mgnt
 	-helm uninstall onos
 	-helm uninstall mininet
 	-helm uninstall free5gc

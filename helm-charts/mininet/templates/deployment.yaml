@@ -22,14 +22,20 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ include "mininet.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["/toposcripts/{{ .Values.topo }}"]
           stdin: true
           tty: true
+          env:
+            - name: ONOS_WEB_USER
+              value: onos
+            - name: ONOS_WEB_PASS
+              value: rocks
           volumeMounts:
             - name: topo-scripts
-              mountPath: /toposcripts
+              mountPath: /toposcripts/{{ .Values.topo }}
+              subPath: {{ .Values.topo }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

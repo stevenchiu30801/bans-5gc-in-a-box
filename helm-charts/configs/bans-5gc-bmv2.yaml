@@ -1,0 +1,52 @@
+# global
+global:
+  freediameter:
+    amf:
+      addr: 192.168.2.2
+    hss:
+      addr: 192.168.2.3
+    smf:
+      addr: 192.168.2.4
+    pcrf:
+      addr: 192.168.2.5
+  enableMininet: true
+  mnEnbBridge:
+    subnet: 192.168.4.0/24
+    rangeStart: 192.168.4.3
+    rangeEnd: 192.168.4.254
+    gateway: 192.168.4.1
+  mnUpfBridge:
+    subnet: 192.168.4.0/24
+    rangeStart: 192.168.4.3
+    rangeEnd: 192.168.4.254
+
+# in free5gc chart
+amf:
+  addr: 192.168.2.2
+
+hss:
+  addr: 192.168.2.3
+
+smf:
+  addr: 192.168.2.4
+
+pcrf:
+  addr: 192.168.2.5
+
+upf:
+  pfcp:
+    addr: 192.168.2.6
+  gtpu:
+    addr: 192.168.4.2
+  enbSubnet: 192.168.3.0/24
+
+# in mininet and onos chart
+bandwidthManagement: true
+
+# in mininet chart
+topo: topo-bmv2.py
+
+# in onos chart
+env:
+  - name: ONOS_APPS
+    value: "drivers,fwd"
