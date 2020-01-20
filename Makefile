@@ -263,3 +263,7 @@ reset-kubeadm:
 	sudo rm -rf /var/lib/cni/networks/mn*
 	-for br in /sys/class/net/mn*; do sudo ip link delete `basename $$br` type bridge; done
 	rm -f $(M)/setup $(M)/kubeadm $(M)/multus-init $(M)/sriov-init $(M)/cluster-setup
+
+force-reset:
+	-sudo killall kubelet etcd kube-apiserver kube-controller-manager kube-scheduler
+	sudo rm -rf /etc/kubernetes /var/lib/etcd /var/lib/kubelet /etc/cni
