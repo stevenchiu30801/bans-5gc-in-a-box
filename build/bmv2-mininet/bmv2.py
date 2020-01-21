@@ -85,7 +85,7 @@ class ONOSBmv2Switch(Switch):
     def __init__(self, name, json=None, debugger=False, loglevel="warn",
                  elogger=False, grpcport=None, cpuport=255, notifications=False,
                  thriftport=None, netcfg=True, dryrun=False, pipeconf="",
-                 pktdump=False, valgrind=False, gnmi=False,
+                 pktdump=False, valgrind=False, gnmi=False, controller="",
                  portcfg=True, onosdevid=None, **kwargs):
         Switch.__init__(self, name, **kwargs)
         self.grpcPort = grpcport
@@ -108,6 +108,8 @@ class ONOSBmv2Switch(Switch):
         self.pipeconfId = pipeconf
         self.injectPorts = parseBoolean(portcfg)
         self.withGnmi = parseBoolean(gnmi)
+        # Provide controller IP instead of using IP given from Mininet
+        self.controller = controller
         self.longitude = kwargs['longitude'] if 'longitude' in kwargs else None
         self.latitude = kwargs['latitude'] if 'latitude' in kwargs else None
         if onosdevid is not None and len(onosdevid) > 0:
@@ -189,6 +191,10 @@ class ONOSBmv2Switch(Switch):
         """
         Notifies ONOS about the new device via Netcfg.
         """
+        # Use configured controller IP if provided
+        if self.controller != "":
+            controllerIP = self.controller
+
         srcIP = self.getSourceIp(controllerIP)
         if not srcIP:
             warn("*** WARN: unable to get switch IP address, won't do netcfg\n")
