@@ -20,7 +20,8 @@ class MinimalTopo(Topo):
         Topo.__init__(self)
 
         info( '*** Adding switch\n' )
-        s1 = self.addSwitch( 's1', cls=ONOSBmv2Switch, pipeconf=PIPECONF_ID )
+        controllerIp = socket.gethostbyname( '{{ .Values.onosGuiService }}' )
+        s1 = self.addSwitch( 's1', cls=ONOSBmv2Switch, controller=controllerIp, pipeconf=PIPECONF_ID )
 
 if __name__ == '__main__':
     setLogLevel( 'info' )
@@ -40,8 +41,7 @@ if __name__ == '__main__':
 {{- end }}
 
     info( '*** Adding controllers\n' )
-    controllerIp = socket.gethostbyname( '{{ .Values.onosGuiService }}' )
-    net.addController( 'onos', controller=RemoteController, ip=controllerIp )
+    net.addController( 'onos', controller=RemoteController )
 
     net.start()
     CLI( net )

@@ -20,11 +20,14 @@ HELM_PLATFORM	?= linux-amd64
 GO_VERSION	?= 1.13.5
 
 HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
+HELM_ARGS	?= --install --wait -f $(HELMVALUES)
 
 # oars
 BASIC_PIPELINE_APP	?= org.onosproject.pipelines.basic
 BMV2_DRIVER_APP		?= org.onosproject.drivers.bmv2
 BW_MGNT_APP			?= org.onosproject.bandwidth-management
+
+SLICE_CONFIG	?= deploy/slice.json
 
 # Targets
 bans-5gc: free5gc
@@ -33,13 +36,15 @@ bans-5gc-ovs: HELMVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
 bans-5gc-ovs: $(M)/cluster-setup $(M)/multus-init onos mininet free5gc
 
 bans-5gc-bmv2: HELMVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
-bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bans-setup free5gc
+bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bans-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
 
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
 
 $(M)/setup:
+	sudo apt update
+	sudo apt install -y curl httpie jq
 	sudo $(MAKEDIR)/scripts/portcheck.sh
 	sudo swapoff -a
 	# To remain swap disabled after reboot
@@ -194,49 +199,61 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 	# showmount -e localhost
 	sudo mkdir $@
 
-.PHONY: bans-setup bmv2-app bw-mgnt-app bw-mgnt-slice
+.PHONY: bans-network-setup onos-bmv2-app check-connect onos-bw-mgnt-app onos-bw-slice
 
-bans-setup: onos bmv2-app mininet #bw-mgnt-app bw-mgnt-slice
+bans-network-setup: onos onos-bmv2-app mininet
 
 /tmp/oars:
 	mkdir -p $@
 	cp $(HELMDIR)/onos-app/oars/* $@
 
-bmv2-app: /tmp/oars
-	# Uninstall original basic pipelines
-	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=uninstall --set appName=$(BASIC_PIPELINE_APP) uninstall-basic-pipelines $(HELMDIR)/onos-app
-	# Install basic pipelines for bandwidth management
-	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BASIC_PIPELINE_APP).oar install-basic-pipelines $(HELMDIR)/onos-app
-	# Since BMv2 driver depends on basic pipelines, uninstallation of basic pipelines would remove it as well
+onos-bmv2-app: /tmp/oars
+	@until http -a onos:rocks --ignore-stdin --check-status GET http://127.0.0.1:30181/onos/v1/applications/org.onosproject.pipelines.basic; \
+	do \
+		echo "Waiting for ONOS to be ready"; \
+		sleep 5; \
+	done
+	# Reinstall basic pipelines for bandwidth management
+	helm upgrade $(HELM_ARGS) --set appCommand=reinstall! --set appName=$(BASIC_PIPELINE_APP) --set appFile=$(BASIC_PIPELINE_APP).oar reinstall-basic-pipelines $(HELMDIR)/onos-app
+	# Since BMv2 driver depends on basic pipelines, reinstallation of basic pipelines would remove it
 	# Reinstall BMv2 driver
-	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BMV2_DRIVER_APP).oar install-bmv2-driver $(HELMDIR)/onos-app
+	helm upgrade $(HELM_ARGS) --set appCommand=install! --set appFile=$(BMV2_DRIVER_APP).oar install-bmv2-driver $(HELMDIR)/onos-app
 
-bw-mgnt-app: /tmp/oars
-	helm upgrade --install --wait -f $(HELMVALUES) --set appCommand=install! --set appFile=$(BW_MGNT_APP).oar install-bw-mgnt $(HELMDIR)/onos-app
+check-connect:
+	scripts/check_connect.sh
 
-bw-mgnt-slice:
+onos-bw-mgnt-app: /tmp/oars
+	helm upgrade $(HELM_ARGS) --set appCommand=install! --set appFile=$(BW_MGNT_APP).oar install-bw-mgnt $(HELMDIR)/onos-app
+	sleep 1
+	@until [[ -z $$(http -a onos:rocks GET http://127.0.0.1:30181/onos/v1/flows/device:bmv2:s1 | jq '.flows[].state' | grep 'PENDING_ADD') ]]; \
+	do \
+		echo "Waiting for flows of bandwidth management to be added"; \
+		sleep 5; \
+	done
+
+onos-bw-slice:
+	curl -u onos:rocks -X POST -H "Content-Type:application/json" -d @$(SLICE_CONFIG) http://127.0.0.1:30181/onos/bandwidth-management/slices
 
 .PHONY: onos mininet mongo free5gc
 
 onos: $(M)/cluster-setup
-	helm upgrade --install --wait -f $(HELMVALUES) onos $(HELMDIR)/onos
+	helm upgrade $(HELM_ARGS) onos $(HELMDIR)/onos
 
-mininet: $(M)/cluster-setup
-	helm upgrade --install --wait -f $(HELMVALUES) mininet $(HELMDIR)/mininet
+mininet: $(M)/cluster-setup $(M)/multus-init
+	helm upgrade $(HELM_ARGS) mininet $(HELMDIR)/mininet
 
 mongo: $(M)/cluster-setup /nfsshare
-	helm upgrade --install --wait -f $(HELMVALUES) mongo $(HELMDIR)/mongo
+	helm upgrade $(HELM_ARGS) mongo $(HELMDIR)/mongo
 
 # https://www.free5gc.org/cluster
 free5gc: $(M)/cluster-setup mongo
-	helm upgrade --install --wait -f $(HELMVALUES) free5gc $(HELMDIR)/free5gc
+	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc
 	@echo "Deployment completed!"
 
 .PHONY: reset-free5gc
 
 reset-bans5gc:
-	-helm uninstall uninstall-basic-pipelines
-	-helm uninstall install-basic-pipelines
+	-helm uninstall reinstall-basic-pipelines
 	-helm uninstall install-bmv2-driver
 	-helm uninstall install-bw-mgnt
 	-helm uninstall onos
@@ -245,7 +262,7 @@ reset-bans5gc:
 	sleep 1
 	# https://github.com/kubernetes/kubernetes/issues/49387
 	# Currently there is no way to filter pod status `Terminating`
-	until [[ -z $$(kubectl get pods | grep Terminating) ]]; \
+	@until [[ -z $$(kubectl get pods | grep Terminating) ]]; \
 	do \
 		echo "Waiting for pods to be terminated"; \
 		sleep 5; \

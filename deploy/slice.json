@@ -1,0 +1,16 @@
+{
+    "slices": [
+        {
+            "minRate": 10,
+            "maxRate": 20,
+            "flows": [
+                {
+                    "srcAddr": "192.168.4.2",
+                    "dstAddr": "192.168.3.3",
+                    "dstPort": "2152",
+                    "protocol": 17
+                }
+            ]
+        }
+    ]
+}
