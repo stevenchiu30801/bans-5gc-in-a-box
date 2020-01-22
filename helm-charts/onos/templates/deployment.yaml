@@ -20,7 +20,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ include "onos.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["./bin/onos-service", "server", "debug"]
           stdin: true

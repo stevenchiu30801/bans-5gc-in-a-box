@@ -49,4 +49,4 @@ topo: topo-bmv2.py
 # in onos chart
 env:
   - name: ONOS_APPS
-    value: "drivers,fwd,hostprovider,proxyarp"
+    value: "drivers,drivers.bmv2,fwd,hostprovider,proxyarp"

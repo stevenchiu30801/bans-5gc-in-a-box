@@ -61,3 +61,14 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+ONOS image
+*/}}
+{{- define "onos.image" -}}
+{{- if not .Values.bandwidthManagement -}}
+"{{ .Values.image.ovs.repository }}:{{ .Values.image.ovs.tag }}"
+{{- else -}}
+"{{ .Values.image.bmv2.repository }}:{{ .Values.image.bmv2.tag }}"
+{{- end -}}
+{{- end -}}

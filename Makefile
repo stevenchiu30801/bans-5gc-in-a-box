@@ -22,12 +22,11 @@ GO_VERSION	?= 1.13.5
 HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
 HELM_ARGS	?= --install --wait -f $(HELMVALUES)
 
-# oars
-BASIC_PIPELINE_APP	?= org.onosproject.pipelines.basic
-BMV2_DRIVER_APP		?= org.onosproject.drivers.bmv2
-BW_MGNT_APP			?= org.onosproject.bandwidth-management
+# ONOS APPs
+BMV2_DRIVER_APP	?= org.onosproject.drivers.bmv2
+BW_MGNT_APP		?= org.onosproject.bandwidth-management
 
-SLICE_CONFIG	?= deploy/slice.json
+SLICE_CONFIG	?= $(DEPLOY)/slice.json
 
 # Targets
 bans-5gc: free5gc
@@ -199,33 +198,28 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 	# showmount -e localhost
 	sudo mkdir $@
 
-.PHONY: bans-network-setup onos-bmv2-app check-connect onos-bw-mgnt-app onos-bw-slice
+.PHONY: bans-network-setup check-onos check-connect onos-bw-mgnt-app onos-bw-slice
 
-bans-network-setup: onos onos-bmv2-app mininet
+bans-network-setup: onos check-onos mininet
 
-/tmp/oars:
-	mkdir -p $@
-	cp $(HELMDIR)/onos-app/oars/* $@
-
-onos-bmv2-app: /tmp/oars
-	@until http -a onos:rocks --ignore-stdin --check-status GET http://127.0.0.1:30181/onos/v1/applications/org.onosproject.pipelines.basic; \
+check-onos:
+	@until http -a onos:rocks --ignore-stdin --check-status GET http://127.0.0.1:30181/onos/v1/applications/org.onosproject.drivers.bmv2 2>&- | jq '.state' 2>&- | grep 'ACTIVE' >/dev/null; \
 	do \
 		echo "Waiting for ONOS to be ready"; \
 		sleep 5; \
 	done
-	# Reinstall basic pipelines for bandwidth management
-	helm upgrade $(HELM_ARGS) --set appCommand=reinstall! --set appName=$(BASIC_PIPELINE_APP) --set appFile=$(BASIC_PIPELINE_APP).oar reinstall-basic-pipelines $(HELMDIR)/onos-app
-	# Since BMv2 driver depends on basic pipelines, reinstallation of basic pipelines would remove it
-	# Reinstall BMv2 driver
-	helm upgrade $(HELM_ARGS) --set appCommand=install! --set appFile=$(BMV2_DRIVER_APP).oar install-bmv2-driver $(HELMDIR)/onos-app
 
 check-connect:
 	scripts/check_connect.sh
 
 onos-bw-mgnt-app: /tmp/oars
-	helm upgrade $(HELM_ARGS) --set appCommand=install! --set appFile=$(BW_MGNT_APP).oar install-bw-mgnt $(HELMDIR)/onos-app
-	sleep 1
-	@until [[ -z $$(http -a onos:rocks GET http://127.0.0.1:30181/onos/v1/flows/device:bmv2:s1 | jq '.flows[].state' | grep 'PENDING_ADD') ]]; \
+	helm upgrade $(HELM_ARGS) --set appCommand=activate --set appName=$(BW_MGNT_APP) activate-bw-mgnt $(HELMDIR)/onos-app
+	@until kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}' | grep 'activate-bw-mgnt-onos-app' >/dev/null; \
+	do \
+		echo "Waiting for bandwidth management application to be activated"; \
+		sleep 3; \
+	done
+	@until ! http -a onos:rocks GET http://127.0.0.1:30181/onos/v1/flows/device:bmv2:s1 2>&- | jq '.flows[].state' | grep 'PENDING_ADD' >/dev/null; \
 	do \
 		echo "Waiting for flows of bandwidth management to be added"; \
 		sleep 5; \
@@ -253,16 +247,14 @@ free5gc: $(M)/cluster-setup mongo
 .PHONY: reset-free5gc
 
 reset-bans5gc:
-	-helm uninstall reinstall-basic-pipelines
-	-helm uninstall install-bmv2-driver
-	-helm uninstall install-bw-mgnt
+	-helm uninstall activate-bw-mgnt
 	-helm uninstall onos
 	-helm uninstall mininet
 	-helm uninstall free5gc
 	sleep 1
 	# https://github.com/kubernetes/kubernetes/issues/49387
 	# Currently there is no way to filter pod status `Terminating`
-	@until [[ -z $$(kubectl get pods | grep Terminating) ]]; \
+	@until ! kubectl get pods | grep 'Terminating' >/dev/null; \
 	do \
 		echo "Waiting for pods to be terminated"; \
 		sleep 5; \
