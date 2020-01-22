@@ -20,7 +20,7 @@ HELM_PLATFORM	?= linux-amd64
 GO_VERSION	?= 1.13.5
 
 HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
-HELM_ARGS	?= --install --wait -f $(HELMVALUES)
+HELM_ARGS	?= --install --wait --timeout 1m -f $(HELMVALUES)
 
 # ONOS APPs
 BMV2_DRIVER_APP	?= org.onosproject.drivers.bmv2
@@ -200,7 +200,7 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 
 .PHONY: bans-network-setup check-onos check-connect onos-bw-mgnt-app onos-bw-slice
 
-bans-network-setup: onos check-onos mininet
+bans-network-setup: $(M)/kubeadm $(M)/multus-init onos check-onos mininet
 
 check-onos:
 	@until http -a onos:rocks --ignore-stdin --check-status GET http://127.0.0.1:30181/onos/v1/applications/org.onosproject.drivers.bmv2 2>&- | jq '.state' 2>&- | grep 'ACTIVE' >/dev/null; \
@@ -212,7 +212,7 @@ check-onos:
 check-connect:
 	scripts/check_connect.sh
 
-onos-bw-mgnt-app: /tmp/oars
+onos-bw-mgnt-app:
 	helm upgrade $(HELM_ARGS) --set appCommand=activate --set appName=$(BW_MGNT_APP) activate-bw-mgnt $(HELMDIR)/onos-app
 	@until kubectl get job -o=jsonpath='{.items[?(@.status.succeeded==1)].metadata.name}' | grep 'activate-bw-mgnt-onos-app' >/dev/null; \
 	do \
@@ -227,6 +227,7 @@ onos-bw-mgnt-app: /tmp/oars
 
 onos-bw-slice:
 	curl -u onos:rocks -X POST -H "Content-Type:application/json" -d @$(SLICE_CONFIG) http://127.0.0.1:30181/onos/bandwidth-management/slices
+	@echo -e "\nSuccessfully add slice!"
 
 .PHONY: onos mininet mongo free5gc
 
