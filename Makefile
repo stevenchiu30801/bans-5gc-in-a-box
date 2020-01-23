@@ -19,8 +19,8 @@ HELM_PLATFORM	?= linux-amd64
 
 GO_VERSION	?= 1.13.5
 
-HELMVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
-HELM_ARGS	?= --install --wait --timeout 1m -f $(HELMVALUES)
+BANSVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
+HELM_ARGS	?= --install --wait --timeout 1m -f $(BANSVALUES)
 
 # ONOS APPs
 BMV2_DRIVER_APP	?= org.onosproject.drivers.bmv2
@@ -31,10 +31,10 @@ SLICE_CONFIG	?= $(DEPLOY)/slice.json
 # Targets
 bans-5gc: free5gc
 
-bans-5gc-ovs: HELMVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
+bans-5gc-ovs: BANSVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
 bans-5gc-ovs: $(M)/cluster-setup $(M)/multus-init onos mininet free5gc
 
-bans-5gc-bmv2: HELMVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
+bans-5gc-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
 bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bans-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
 
 cluster: $(M)/kubeadm /usr/local/bin/helm

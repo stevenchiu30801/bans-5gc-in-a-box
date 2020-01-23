@@ -10,11 +10,13 @@ global:
     pcrf:
       addr: 192.168.2.5
   enableMininet: true
+  # bridge between mininet and enodeb
   mnEnbBridge:
     subnet: 192.168.4.0/24
     rangeStart: 192.168.4.3
     rangeEnd: 192.168.4.254
     gateway: 192.168.4.1
+  # bridge between mininet and upf
   mnUpfBridge:
     subnet: 192.168.4.0/24
     rangeStart: 192.168.4.3
