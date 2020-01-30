@@ -12,6 +12,9 @@ RUN cd /usr/src; \
     git clone https://bitbucket.org/nctu_5g/$REPO.git
 
 WORKDIR /usr/src/$REPO
+
+RUN ./support/freeDiameter/make_certs.sh ./support/freeDiameter
+
 RUN autoreconf -iv && \
     ./configure --prefix=`pwd`/install && \
     make -j `nproc` && \
