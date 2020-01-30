@@ -20,7 +20,7 @@ HELM_PLATFORM	?= linux-amd64
 GO_VERSION	?= 1.13.5
 
 BANSVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
-HELM_ARGS	?= --install --wait --timeout 1m -f $(BANSVALUES)
+HELM_ARGS	?= --install --wait --timeout 6m -f $(BANSVALUES)
 
 # ONOS APPs
 BMV2_DRIVER_APP	?= org.onosproject.drivers.bmv2
