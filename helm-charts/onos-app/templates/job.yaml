@@ -21,16 +21,8 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: [{{ include "onos-app.cmdArgs" . }}]
-          volumeMounts:
-            - name: oars
-              mountPath: /oars
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-      volumes:
-        - name: oars
-          hostPath:
-            path: /tmp/oars
-            type: Directory
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
