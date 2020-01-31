@@ -31,6 +31,9 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 ```ShellSession
 # On Kubernetes node
 
+# Pre-install
+sudo apt install -y make
+
 # Configure network environment
 sudo ifconfig ${ENODEB_INTF} 192.168.3.2
 sudo sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
