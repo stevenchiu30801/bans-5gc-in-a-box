@@ -46,7 +46,7 @@ Configure eNodeB settings
 - Gateway/Router 192.168.3.2
 - MME/AMF IP 192.168.2.2
 
-NOTE 1: For [deploying 5GC only](#deploying-5gc-only), it should be fine to set your desired address on both eNodeB and Kubernetes node interface connecting to eNodeB. Simply make sure packets be correctly forwarded between two devices.
+NOTE 1: For [deploying 5GC only](#deploying-5gc-only), it should be fine to set your desired address on both eNodeB and Kubernetes node interface connecting to eNodeB. Simply make sure packets can be correctly forwarded between two devices.
 
 NOTE 2: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), `${ENODEB_INTF}` should be any available address under subnet 192.168.3.0/24 by default. See [Customizing Configuration](#customizing-configuration) section to customize the subnet in deployment.
 
@@ -80,7 +80,10 @@ make bans-5gc-ovs
 make bans-5gc-bmv2
 
 # Override default slice configuration
-SLICE_CONFIG=<path/to/file> make bans-5gc-bmv2
+SLICE_CONFIG=/path/to/file make bans-5gc-bmv2
+
+# Add new onos slice on existing deployment
+SLICE_CONFIG=/path/to/file make onos-bw-slice
 ```
 
 Example slice configuration is placed at `deploy/slice.json`.
@@ -89,7 +92,7 @@ Example slice configuration is placed at `deploy/slice.json`.
 
 ```ShellSession
 # Customize configuration
-BANSVALUES=<path/to/file> make [target]
+BANSVALUES=/path/to/file make [target]
 ```
 
 Example configuration files for deployment locate in `helm-charts/configs/<target>.yaml`.
