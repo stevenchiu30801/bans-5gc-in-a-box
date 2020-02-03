@@ -41,6 +41,8 @@ cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
 
+sriov-setup: $(M)/sriov-init $(M)/multus-init
+
 $(M)/setup:
 	sudo apt update
 	sudo apt install -y curl httpie jq
@@ -145,7 +147,7 @@ cni-plugins-update: | /usr/local/go
 # https://github.com/intel/sriov-network-device-plugin
 $(R)/sriov-network-device-plugin/build/sriovdp: | /usr/local/go
 	-git clone https://github.com/intel/sriov-network-device-plugin.git $(R)/sriov-network-device-plugin
-	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-network-device-plugin; make
+	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-network-device-plugin; make && make image
 
 $(M)/preference: | /usr/bin/kubeadm /usr/local/bin/helm
 	# https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion
@@ -186,7 +188,7 @@ $(M)/multus-init: | $(M)/kubeadm
 
 # https://github.com/intel/sriov-network-device-plugin
 $(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp
-	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/configMap.yaml
+	kubectl apply -f $(DEPLOY)/sriov-configmap.yaml
 	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/k8s-v1.16/sriovdp-daemonset.yaml
 	touch $@
 
