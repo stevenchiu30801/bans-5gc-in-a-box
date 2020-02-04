@@ -61,3 +61,14 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+UPF setup
+*/}}
+{{- define "upf.setup" -}}
+{{- if .Values.global.enableMininet -}}
+/root/setup.sh && ethtool -K net1 tx off
+{{- else -}}
+/root/setup.sh
+{{- end -}}
+{{- end -}}

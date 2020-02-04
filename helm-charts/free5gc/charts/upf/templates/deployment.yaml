@@ -30,7 +30,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/bash"]
-          args: ["-c", "/root/setup.sh && /usr/src/free5gc-stage-1/free5gc-upfd"]
+          args: ["-c", "{{ include "upf.setup" . }} && /usr/src/free5gc-stage-1/free5gc-upfd"]
           stdin: true
           tty: true
           volumeMounts:
