@@ -142,6 +142,7 @@ onos:
 
 mininet:
 	cp -R $(DEPLOY)/mininet/toposcripts /tmp
+	sudo chmod +x /tmp/toposcripts/*
 	sudo modprobe openvswitch
 	kubectl apply -f $(DEPLOY)/mininet/
 
