@@ -35,7 +35,7 @@ bans-5gc-ovs: BANSVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
 bans-5gc-ovs: $(M)/cluster-setup $(M)/multus-init onos mininet free5gc
 
 bans-5gc-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
-bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bans-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
+bans-5gc-bmv2: $(M)/cluster-setup $(M)/multus-init bmv2-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
 
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
@@ -204,9 +204,9 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 	# Check if /etc/exports is properly loaded
 	# showmount -e localhost
 
-.PHONY: bans-network-setup check-onos check-connect onos-bw-mgnt-app onos-bw-slice
+.PHONY: bmv2-network-setup check-onos check-connect onos-bw-mgnt-app onos-bw-slice
 
-bans-network-setup: $(M)/kubeadm $(M)/multus-init onos check-onos mininet
+bmv2-network-setup: $(M)/kubeadm $(M)/multus-init onos check-onos mininet
 
 check-onos:
 	@until http -a onos:rocks --ignore-stdin --check-status GET http://127.0.0.1:30181/onos/v1/applications/org.onosproject.drivers.bmv2 2>&- | jq '.state' 2>&- | grep 'ACTIVE' >/dev/null; \
