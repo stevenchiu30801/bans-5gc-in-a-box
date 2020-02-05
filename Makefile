@@ -28,6 +28,9 @@ BW_MGNT_APP		?= org.onosproject.bandwidth-management
 
 SLICE_CONFIG	?= $(DEPLOY)/slice.json
 
+SRIOV_INTF		?=
+SRIOV_VF_NUM	?= 4
+
 # Targets
 bans-5gc: free5gc
 
@@ -149,6 +152,16 @@ $(R)/sriov-network-device-plugin/build/sriovdp: | /usr/local/go
 	-git clone https://github.com/intel/sriov-network-device-plugin.git $(R)/sriov-network-device-plugin
 	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-network-device-plugin; make && make image
 
+.PHONY: sriov-server-config
+
+sriov-server-config:
+	@if [[ -z "${SRIOV_INTF}" ]]; \
+	then \
+		echo "Invalid value: SRIOV_INTF must be provided"; \
+		exit 1; \
+	fi
+	$(MAKEDIR)/scripts/sriov_config.sh ${SRIOV_INTF} ${SRIOV_VF_NUM}
+
 $(M)/preference: | /usr/bin/kubeadm /usr/local/bin/helm
 	# https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion
 	sudo apt-get install bash-completion
@@ -187,8 +200,8 @@ $(M)/multus-init: | $(M)/kubeadm
 	touch $@
 
 # https://github.com/intel/sriov-network-device-plugin
-$(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp
-	kubectl apply -f $(DEPLOY)/sriov-configmap.yaml
+$(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp sriov-server-config
+	sed 's/SRIOV_INTF/${SRIOV_INTF}/g' $(DEPLOY)/sriov-configmap.yaml | kubectl apply -f -
 	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/k8s-v1.16/sriovdp-daemonset.yaml
 	touch $@
 
@@ -216,7 +229,7 @@ check-onos:
 	done
 
 check-connect:
-	scripts/check_connect.sh
+	$(MAKEDIR)/scripts/check_connect.sh
 
 onos-bw-mgnt-app:
 	helm upgrade $(HELM_ARGS) --set appCommand=activate --set appName=$(BW_MGNT_APP) activate-bw-mgnt $(HELMDIR)/onos-app

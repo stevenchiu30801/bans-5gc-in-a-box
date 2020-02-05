@@ -7,9 +7,9 @@ data:
   config.json: |
     {
         "resourceList": [{
-                "resourceName": "intel_sriov",
+                "resourceName": "sriov_net",
                 "selectors": {
-                    "pfName": ["enp1s0f0"]
+                    "pfName": ["SRIOV_INTF"]
                 }
             }
         ]
