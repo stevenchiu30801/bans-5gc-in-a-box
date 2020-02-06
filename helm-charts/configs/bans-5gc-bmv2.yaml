@@ -24,7 +24,10 @@ global:
 
 # in free5gc chart
 amf:
-  addr: 192.168.2.2
+  http:
+    addr: 192.168.2.2
+  s1ap:
+    addr: 192.168.2.2
 
 hss:
   addr: 192.168.2.3

@@ -73,7 +73,7 @@ data:
     #      dev: eth0
     #
         s1ap:
-          addr: {{ .Values.amf.addr }}
+          addr: {{ .Values.amf.s1ap.addr }}
     
     #
     #  <GUMMEI>
