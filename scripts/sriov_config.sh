@@ -2,7 +2,7 @@
 
 usage() {
     echo "***Experimental script for SR-IOV configuration***"
-    echo "Configure virtual functions on SR-IOV interface"
+    echo "Configure virtual functions on SR-IOV device"
     echo ""
     echo "Usage: ./sriov_config.sh SRIOV-INTF NUM_VF"
     echo "Arguments:"
@@ -42,27 +42,35 @@ if ! dmesg | grep 'DMAR: IOMMU enabled' >/dev/null; then
     exit 1
 fi
 
-# Check the driver used by the interface
+# Get the driver used by the device
 DRIVER=$( ethtool -i $1 | awk '$1=="driver:" {print $2}' )
 
-# Check if driver is included in Linux kernel
-if ! find /lib/modules/$(uname -r) -type f -name '*.ko' | grep /${DRIVER}.ko >/dev/null; then
-    echo "PF driver '${DRIVER}' is not provided in kernel"
-    echo "Please install the driver '${DRIVER}'"
-    exit 1
-elif ! find /lib/modules/$(uname -r) -type f -name '*.ko' | grep /${DRIVER}vf.ko >/dev/null; then
-    echo "VF driver '${DRIVER}vf' is not provided in kernel"
-    echo "Please install the driver '${DRIVER}vf'"
+if [[ -z "${DRIVER}" ]]; then
+    echo "No driver information for device '$1'"
     exit 1
 fi
 
-# Load device's kernel module
-modprobe ${DRIVER}
+# Check if device's kernel module is loaded
+if ! lsmod | awk '{print $1}' | grep ${DRIVER} >/dev/null; then
+    # Check if driver is included in Linux kernel
+    if ! find /lib/modules/$(uname -r) -type f -name '*.ko' | grep /${DRIVER}.ko >/dev/null; then
+        echo "PF driver '${DRIVER}' is not provided in kernel"
+        echo "Please install the driver '${DRIVER}'"
+        exit 1
+    elif ! find /lib/modules/$(uname -r) -type f -name '*.ko' | grep /${DRIVER}vf.ko >/dev/null; then
+        echo "VF driver '${DRIVER}vf' is not provided in kernel"
+        echo "Please install the driver '${DRIVER}vf'"
+        exit 1
+    fi
+
+    # Load device's kernel module
+    modprobe ${DRIVER}
+fi
 
 # Check if the requested number of VFs exceeds the maximum number of supported VFs
 TOTAL_VF=$( cat /sys/class/net/$1/device/sriov_totalvfs )
 if [[ $2 -gt ${TOTAL_VF} ]]; then
-    echo "Number of VFs should not exceed the maximum number of VFs supported by the adapter '$1'"
+    echo "Number of VFs should not exceed the maximum number of VFs supported by device '$1'"
     echo "Maximum number: ${TOTAL_VF}"
     exit 1
 fi
