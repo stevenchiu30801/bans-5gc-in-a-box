@@ -10,14 +10,22 @@ global:
     pcrf:
       addr: 192.168.2.5
   enableMininet: false
-  enableSriov: false
+  enableSriov: true
 
 # in free5gc chart
 amf:
   http:
     addr: 192.168.2.2
   s1ap:
-    addr: 192.168.2.2
+    addr: 192.168.3.2
+    subnet: 192.168.3.0/24
+
+  # sriov resources
+  resources:
+    requests:
+      intel.com/sriov_net: '1'
+    limits:
+      intel.com/sriov_net: '1'
 
 hss:
   addr: 192.168.2.3
@@ -32,4 +40,12 @@ upf:
   pfcp:
     addr: 192.168.2.6
   gtpu:
-    addr: 192.168.2.6
+    addr: 192.168.3.6
+    subnet: 192.168.3.0/24
+
+  # sriov resources
+  resources:
+    requests:
+      intel.com/sriov_net: '1'
+    limits:
+      intel.com/sriov_net: '1'

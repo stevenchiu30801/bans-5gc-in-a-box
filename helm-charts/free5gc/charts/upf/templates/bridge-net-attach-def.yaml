@@ -2,7 +2,7 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: upf-bridge-conf
+  name: upf-bridge-net
   annotations:
     "helm.sh/hook-weight": "5"
 spec:

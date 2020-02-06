@@ -1,7 +1,7 @@
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: mn-enb-bridge-conf
+  name: mn-enb-bridge-net
 spec:
   config: '{
     "name": "mn1",
@@ -19,7 +19,7 @@ spec:
 apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
-  name: mn-upf-bridge-conf
+  name: mn-upf-bridge-net
 spec:
   config: '{
     "name": "mn2",

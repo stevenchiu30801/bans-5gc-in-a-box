@@ -18,7 +18,9 @@ spec:
       annotations:
         cni.projectcalico.org/ipAddrs: "[\"{{ .Values.pfcp.addr }}\"]"
 {{- if .Values.global.enableMininet }}
-        k8s.v1.cni.cncf.io/networks: upf-bridge-conf
+        k8s.v1.cni.cncf.io/networks: upf-bridge-net
+{{- else if .Values.global.enableSriov }}
+        k8s.v1.cni.cncf.io/networks: upf-sriov-net
 {{- end }}
     spec:
       securityContext:

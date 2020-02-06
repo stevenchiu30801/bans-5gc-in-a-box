@@ -62,6 +62,16 @@ make
 make bans-5gc
 ```
 
+### Deploying 5GC Only with SR-IOV
+
+```ShellSession
+# Deploy
+# The argument `SRIOV_INTF` is required for server setup and creating SR-IOV resources
+SRIOV_INTF=devicename make bans-5gc-sriov
+```
+
+NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* target fails at `sriov-server-setup`.
+
 ### Deploying 5GC with SDN-based Transport
 
 A OvS-based Mininet pod is placed between eNodeB and UPF pod.

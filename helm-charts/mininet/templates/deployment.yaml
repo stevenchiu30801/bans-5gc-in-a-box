@@ -14,7 +14,7 @@ spec:
       labels:
         {{- include "mininet.selectorLabels" . | nindent 8 }}
       annotations:
-        k8s.v1.cni.cncf.io/networks: mn-enb-bridge-conf,mn-upf-bridge-conf
+        k8s.v1.cni.cncf.io/networks: mn-enb-bridge-net,mn-upf-bridge-net
     spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}

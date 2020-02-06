@@ -40,6 +40,9 @@ bans-5gc-ovs: onos mininet free5gc
 bans-5gc-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
 bans-5gc-bmv2: bmv2-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
 
+bans-5gc-sriov: BANSVALUES := $(HELMDIR)/configs/bans-5gc-sriov.yaml
+bans-5gc-sriov: sriov-setup free5gc
+
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
@@ -152,9 +155,9 @@ $(R)/sriov-network-device-plugin/build/sriovdp: | /usr/local/go
 	-git clone https://github.com/intel/sriov-network-device-plugin.git $(R)/sriov-network-device-plugin
 	export PATH=$$PATH:/usr/local/go/bin; cd $(R)/sriov-network-device-plugin; make && make image
 
-.PHONY: sriov-server-config
+.PHONY: sriov-server-setup
 
-sriov-server-config:
+sriov-server-setup:
 	@if [[ -z "${SRIOV_INTF}" ]]; \
 	then \
 		echo "Invalid value: SRIOV_INTF must be provided"; \
@@ -200,8 +203,8 @@ $(M)/multus-init: | $(M)/kubeadm
 	touch $@
 
 # https://github.com/intel/sriov-network-device-plugin
-$(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp sriov-server-config
-	sed 's/SRIOV_INTF/${SRIOV_INTF}/g' $(DEPLOY)/sriov-configmap.yaml | kubectl apply -f -
+$(M)/sriov-init: | $(M)/kubeadm /opt/cni/bin/sriov $(R)/sriov-network-device-plugin/build/sriovdp sriov-server-setup
+	sed 's/PF_NAME/${SRIOV_INTF}/g' $(DEPLOY)/sriov-configmap.yaml | sed "s/LAST_VF/$$(( ${SRIOV_VF_NUM} - 1 ))/g" | kubectl apply -f -
 	kubectl apply -f $(R)/sriov-network-device-plugin/deployments/k8s-v1.16/sriovdp-daemonset.yaml
 	touch $@
 
