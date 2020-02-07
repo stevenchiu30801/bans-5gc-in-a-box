@@ -163,7 +163,7 @@ sriov-server-setup:
 		echo "Invalid value: SRIOV_INTF must be provided"; \
 		exit 1; \
 	fi
-	$(MAKEDIR)/scripts/sriov_config.sh ${SRIOV_INTF} ${SRIOV_VF_NUM}
+	$(MAKEDIR)/scripts/sriov_setup.sh ${SRIOV_INTF} ${SRIOV_VF_NUM}
 
 $(M)/preference: | /usr/bin/kubeadm /usr/local/bin/helm
 	# https://kubernetes.io/docs/tasks/tools/install-kubectl/#enabling-shell-autocompletion

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 usage() {
-    echo "***Experimental script for SR-IOV configuration***"
+    echo "***Experimental script for SR-IOV setup***"
     echo "Configure virtual functions on SR-IOV device"
     echo ""
-    echo "Usage: ./sriov_config.sh SRIOV-INTF NUM_VF"
+    echo "Usage: ./sriov_setup.sh SRIOV-INTF NUM_VF"
     echo "Arguments:"
     echo "    SRIOV_INTF        Interface to be enabled SR-IOV"
     echo "    NUM_VF            Number of VFs to be created"
