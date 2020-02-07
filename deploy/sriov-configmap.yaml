@@ -9,7 +9,7 @@ data:
         "resourceList": [{
                 "resourceName": "sriov_net",
                 "selectors": {
-                    "pfName": ["PF_NAME#0-LAST_VF"]
+                    "pfNames": ["PF_NAME#0-LAST_VF"]
                 }
             }
         ]
