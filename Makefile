@@ -86,6 +86,10 @@ $(M)/preference: | $(M)/setup /usr/bin/kubeadm
 
 # https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 $(M)/kubeadm: | $(M)/setup /usr/bin/kubeadm
+	# Check if directory /var/lib/etcd exists
+	if [[ -d /var/lib/etcd ]]; then \
+		sudo rm -rf /var/lib/etcd; \
+	fi
 	# https://coredns.io/plugins/loop/#troubleshooting
 	# DNS forwarding loop is encoutered
 	echo "nameserver 8.8.8.8" | tee /tmp/resolv.conf
