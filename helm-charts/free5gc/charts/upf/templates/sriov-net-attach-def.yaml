@@ -5,6 +5,7 @@ metadata:
   name: upf-sriov-net
   annotations:
     k8s.v1.cni.cncf.io/resourceName: intel.com/sriov_net
+    "helm.sh/hook-weight": "-10"
 spec:
   config: '{
   "type": "sriov",

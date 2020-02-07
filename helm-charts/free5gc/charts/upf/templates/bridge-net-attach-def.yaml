@@ -4,7 +4,7 @@ kind: NetworkAttachmentDefinition
 metadata:
   name: upf-bridge-net
   annotations:
-    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-weight": "-10"
 spec:
   config: '{
     "name": "mn2",

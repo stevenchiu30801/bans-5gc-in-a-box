@@ -2,6 +2,8 @@ apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
   name: mn-enb-bridge-net
+  annotations:
+    "helm.sh/hook-weight": "-10"
 spec:
   config: '{
     "name": "mn1",
@@ -20,6 +22,8 @@ apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
   name: mn-upf-bridge-net
+  annotations:
+    "helm.sh/hook-weight": "-10"
 spec:
   config: '{
     "name": "mn2",
