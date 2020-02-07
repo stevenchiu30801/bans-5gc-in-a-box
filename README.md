@@ -30,6 +30,10 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 
 ### Setup
 
+The setup assumes the eNodeB is directly connected to the server. Please modify eNodeB network configuration to work with your network environment.
+
+#### Without SR-IOV
+
 ```ShellSession
 # On Kubernetes node
 
@@ -46,11 +50,28 @@ Configure eNodeB settings
 - Gateway/Router 192.168.3.2
 - MME/AMF IP 192.168.2.2
 
-NOTE 1: For [deploying 5GC only](#deploying-5gc-only), it should be fine to set your desired address on both eNodeB and Kubernetes node interface connecting to eNodeB. Simply make sure packets can be correctly forwarded between two devices.
+NOTE 1: `${ENODEB_INTF}` is server's interface connecting to eNodeB.
 
-NOTE 2: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), `${ENODEB_INTF}` should be any available address under subnet 192.168.3.0/24 by default. See [Customizing Configuration](#customizing-configuration) section to customize the subnet in deployment.
+NOTE 2: For [deploying 5GC only](#deploying-5gc-only), it should be fine to set your desired address and subnet on both eNodeB and Kubernetes node interface connecting to eNodeB. Simply make sure packets can be correctly forwarded between two devices.
 
-NOTE 3: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), it's important to make sure the index of network interface connecting to the Internet is smaller than the one connecting to eNodeB.
+NOTE 3: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), `${ENODEB_INTF}` should be any available address under subnet 192.168.3.0/24 by default. See [Customizing Configuration](#customizing-configuration) section to customize the subnet in deployment.
+
+NOTE 4: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), it's important to make sure the index of network interface connecting to the Internet is smaller than the one connecting to eNodeB.
+
+#### With SR-IOV
+
+```ShellSession
+# On Kubernetes node
+
+# Pre-install
+sudo apt install -y make
+```
+
+Configure eNodeB settings
+- IP address in subnet 192.168.3.0/24 (excluding 192.168.3.2 and 192.168.3.6)
+- MME/AMF IP 192.168.3.2
+
+NOTE 1: 192.168.3.2 and 192.168.3.6 are AMF's and UPF's IP address respectively by default. See [Customizing Configuration](#customizing-configuration) section to customize two IP addresses.
 
 ### Deploying 5GC Only
 
@@ -61,16 +82,6 @@ make
 # or
 make bans-5gc
 ```
-
-### Deploying 5GC Only with SR-IOV
-
-```ShellSession
-# Deploy
-# The argument `SRIOV_INTF` is required for server setup and creating SR-IOV resources
-SRIOV_INTF=devicename make bans-5gc-sriov
-```
-
-NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* target fails at `sriov-server-setup`.
 
 ### Deploying 5GC with SDN-based Transport
 
@@ -98,6 +109,16 @@ SLICE_CONFIG=/path/to/file make onos-bw-slice
 
 Example slice configuration is placed at `deploy/slice.json`.
 
+### Deploying 5GC Only with SR-IOV
+
+```ShellSession
+# Deploy
+# The argument `SRIOV_INTF` is required for server setup and creating SR-IOV resources
+SRIOV_INTF=devicename make bans-5gc-sriov
+```
+
+NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* target fails at `sriov-server-setup`.
+
 ### Customizing Configuration
 
 ```ShellSession
@@ -105,7 +126,7 @@ Example slice configuration is placed at `deploy/slice.json`.
 BANSVALUES=/path/to/file make [target]
 ```
 
-Example configuration files for deployment locate in `helm-charts/configs/<target>.yaml`.
+Default configuration files for deployment locate in `helm-charts/configs/<target>.yaml`.
 
 ## Dockerfile
 
