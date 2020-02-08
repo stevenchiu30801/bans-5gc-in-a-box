@@ -46,15 +46,15 @@ sudo sh -c 'echo 1 > /proc/sys/net/ipv4/ip_forward'
 ```
 
 Configure eNodeB settings
-- IP address in subnet 192.168.3.0/24 (excluding `${ENODEB_INTF}`)
+- IP address in subnet 192.168.3.0/24 (excluding ${ENODEB_INTF})
 - Gateway/Router 192.168.3.2
 - MME/AMF IP 192.168.2.2
 
-NOTE 1: `${ENODEB_INTF}` is server's interface connecting to eNodeB.
+NOTE 1: ${ENODEB_INTF} is server's interface connecting to eNodeB.
 
 NOTE 2: For [deploying 5GC only](#deploying-5gc-only), it should be fine to set your desired address and subnet on both eNodeB and Kubernetes node interface connecting to eNodeB. Simply make sure packets can be correctly forwarded between two devices.
 
-NOTE 3: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), `${ENODEB_INTF}` should be any available address under subnet 192.168.3.0/24 by default. See [Customizing Configuration](#customizing-configuration) section to customize the subnet in deployment.
+NOTE 3: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), ${ENODEB_INTF} should be any available address under subnet 192.168.3.0/24 by default. See [Customizing Configuration](#customizing-configuration) section to customize the subnet in deployment.
 
 NOTE 4: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-based-transport) and [with BANS](#deploying-5gc-with-bans), it's important to make sure the index of network interface connecting to the Internet is smaller than the one connecting to eNodeB.
 
@@ -117,7 +117,7 @@ Example slice configuration is placed at `deploy/slice.json`.
 SRIOV_INTF=devicename make bans-5gc-sriov
 ```
 
-NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* target fails at `sriov-server-setup`.
+NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* fails at target *sriov-server-setup*.
 
 ### Customizing Configuration
 
