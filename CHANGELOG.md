@@ -10,3 +10,8 @@
 
 - Add 5GC deployment with BANS
 - Use Helm 3.0.0 to deploy Kubernetes objects
+
+# Release-1.1
+
+- Experimental server setup script for SR-IOV configuration
+- Add 5GC deployment only with SR-IOV
