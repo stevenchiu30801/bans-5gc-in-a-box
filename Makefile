@@ -38,7 +38,7 @@ bans-5gc-ovs: BANSVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
 bans-5gc-ovs: onos mininet free5gc
 
 bans-5gc-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
-bans-5gc-bmv2: bmv2-network-setup free5gc check-connect onos-bw-mgnt-app onos-bw-slice
+bans-5gc-bmv2: bmv2-network-setup free5gc check-connect onos-bw-mgnt-app add-onos-slice
 
 bans-5gc-sriov: BANSVALUES := $(HELMDIR)/configs/bans-5gc-sriov.yaml
 bans-5gc-sriov: sriov-setup free5gc
@@ -224,7 +224,7 @@ $(M)/cluster-setup: | $(M)/kubeadm /usr/local/bin/helm
 	# Check if /etc/exports is properly loaded
 	# showmount -e localhost
 
-.PHONY: bmv2-network-setup check-onos check-connect onos-bw-mgnt-app onos-bw-slice
+.PHONY: bmv2-network-setup check-onos check-connect onos-bw-mgnt-app
 
 bmv2-network-setup: onos check-onos mininet
 
@@ -251,9 +251,16 @@ onos-bw-mgnt-app:
 		sleep 5; \
 	done
 
-onos-bw-slice:
+.PHONY: add-onos-slice del-onos-slices
+
+# Add ONOS bandwidth slice with configuration file
+add-onos-slice:
 	curl -u onos:rocks -X POST -H "Content-Type:application/json" -d @$(SLICE_CONFIG) http://127.0.0.1:30181/onos/bandwidth-management/slices
 	@echo -e "\nSuccessfully add slice!"
+
+# Delete all ONOS bandwidth slices
+del-onos-slices:
+	curl -u onos:rocks -X DELETE http://127.0.0.1:30181/onos/bandwidth-management/slices
 
 .PHONY: onos mininet mongo free5gc
 
