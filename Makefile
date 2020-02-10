@@ -278,7 +278,7 @@ free5gc: $(M)/cluster-setup mongo
 	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc
 	@echo "Deployment completed!"
 
-.PHONY: reset-free5gc
+.PHONY: reset-bans5gc
 
 reset-bans5gc:
 	-helm uninstall activate-bw-mgnt
