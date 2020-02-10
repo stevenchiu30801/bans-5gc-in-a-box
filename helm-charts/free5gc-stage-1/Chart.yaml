@@ -1,6 +1,6 @@
 apiVersion: v2
 name: free5gc
-description: A Helm chart for free5GC
+description: A Helm chart for free5GC stage 1
 type: application
 version: 1.0.0
 appVersion: 1.0.0

@@ -19,7 +19,7 @@ HELM_PLATFORM	?= linux-amd64
 
 GO_VERSION	?= 1.13.5
 
-BANSVALUES	?= $(HELMDIR)/configs/bans-5gc.yaml
+BANSVALUES	?= $(HELMDIR)/configs/bans-5gcv1.yaml
 HELM_ARGS	?= --install --wait --timeout 6m -f $(BANSVALUES)
 
 # ONOS APPs
@@ -32,16 +32,16 @@ SRIOV_INTF		?=
 SRIOV_VF_NUM	?= 4
 
 # Targets
-bans-5gc: free5gc
+bans-5gcv1: free5gc-stage-1
 
-bans-5gc-ovs: BANSVALUES := $(HELMDIR)/configs/bans-5gc-ovs.yaml
-bans-5gc-ovs: onos mininet free5gc
+bans-5gcv1-ovs: BANSVALUES := $(HELMDIR)/configs/bans-5gcv1-ovs.yaml
+bans-5gcv1-ovs: onos mininet free5gc-stage-1
 
-bans-5gc-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gc-bmv2.yaml
-bans-5gc-bmv2: bmv2-network-setup free5gc check-connect onos-bw-mgnt-app add-onos-slice
+bans-5gcv1-bmv2: BANSVALUES := $(HELMDIR)/configs/bans-5gcv1-bmv2.yaml
+bans-5gcv1-bmv2: bmv2-network-setup free5gc-stage-1 check-connect onos-bw-mgnt-app add-onos-slice
 
-bans-5gc-sriov: BANSVALUES := $(HELMDIR)/configs/bans-5gc-sriov.yaml
-bans-5gc-sriov: sriov-setup free5gc
+bans-5gcv1-sriov: BANSVALUES := $(HELMDIR)/configs/bans-5gcv1-sriov.yaml
+bans-5gcv1-sriov: sriov-setup free5gc-stage-1
 
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
@@ -262,7 +262,7 @@ add-onos-slice:
 del-onos-slices:
 	curl -u onos:rocks -X DELETE http://127.0.0.1:30181/onos/bandwidth-management/slices
 
-.PHONY: onos mininet mongo free5gc
+.PHONY: onos mininet mongo free5gc-stage-1
 
 onos: $(M)/cluster-setup
 	helm upgrade $(HELM_ARGS) onos $(HELMDIR)/onos
@@ -274,8 +274,8 @@ mongo: $(M)/cluster-setup /nfsshare
 	helm upgrade $(HELM_ARGS) mongo $(HELMDIR)/mongo
 
 # https://www.free5gc.org/cluster
-free5gc: $(M)/cluster-setup mongo
-	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc
+free5gc-stage-1: $(M)/cluster-setup mongo
+	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc-stage-1
 	@echo "Deployment completed!"
 
 .PHONY: reset-bans5gc

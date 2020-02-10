@@ -1,6 +1,8 @@
 # Configuration Docs
 
-## Root
+## For free5GC Stage 1
+
+### Root
 
 | Field                 | Object        | Description                                                                                                                         |
 |-----------------------|---------------|-------------------------------------------------------------------------------------------------------------------------------------|
@@ -14,7 +16,7 @@
 | `topo`                | String        | Topology script for Mininet                                                                                                         |
 | `env`                 | OnosEnv array | Array of environment variables for ONOS                                                                                             |
 
-## Global
+### Global
 
 | Field           | Object       | Description                                                                                                                 |
 |-----------------|--------------|-----------------------------------------------------------------------------------------------------------------------------|
@@ -24,14 +26,14 @@
 | `mnEnbBridge`   | IpamConf     | IPAM configuration of type host-local for bridge between Mininet and eNodeB                                                 |
 | `mnUpfBridge`   | IpamConf     | IPAM configuration of type host-local for bridge between Mininet and UPF                                                    |
 
-## Amf
+### Amf
 
 | Field  | Object | Description                    |
 |--------|--------|--------------------------------|
 | `http` | IpAddr | IP address of AMF HTTP channel |
 | `s1ap` | IpAddr | IP address of AMF S1AP channel |
 
-## Upf
+### Upf
 
 | Field       | Object | Description                     |
 |-------------|--------|---------------------------------|
@@ -39,14 +41,14 @@
 | `gtpu`      | IpAddr | IP address of UPF GTP-U channel |
 | `enbSubnet` | String | IP subnet of eNodeB             |
 
-## OnosEnv
+### OnosEnv
 
 | Field   | Object | Description                |
 |---------|--------|----------------------------|
 | `name`  | String | Environment variable name  |
 | `value` | String | Environment variable value |
 
-## Freediameter
+### Freediameter
 
 | Field  | Object | Description                                                                      |
 |--------|--------|----------------------------------------------------------------------------------|
@@ -55,11 +57,11 @@
 | `smf`  | IpAddr | IP address of SMF FreeDiameter channel. This value should be same as `.smf`      |
 | `pcrf` | IpAddr | IP address of PCRF FreeDiameter channel. This value should be same as `.pcrf`    |
 
-## IpamConf
+### IpamConf
 
 See [containernetworking/plugins#plugins/ipam/host-local](https://github.com/containernetworking/plugins/blob/master/plugins/ipam/host-local)
 
-## IpAddr
+### IpAddr
 
 | Field  | Object | Description |
 |--------|--------|-------------|
