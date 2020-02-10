@@ -128,6 +128,8 @@ BANSVALUES=/path/to/file make [target]
 
 Default configuration files for deployment locate in `helm-charts/configs/<target>.yaml`.
 
+See `helm-charts/configs/README.md` for more informations.
+
 ## Dockerfile
 
 The free5GC Dockerfiles, `build/free5gc-*`, are referred to [open5gs/open5gs](https://github.com/open5gs/open5gs/tree/master/docker)
