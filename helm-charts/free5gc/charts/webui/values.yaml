@@ -6,7 +6,7 @@ replicaCount: 1
 
 image:
   repository: steven30801/free5gc-webui
-  tag: latest
+  tag: stage-1
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
