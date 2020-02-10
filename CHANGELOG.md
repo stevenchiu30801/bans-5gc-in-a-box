@@ -15,3 +15,4 @@
 
 - Experimental server setup script for SR-IOV configuration
 - Add 5GC deployment only with SR-IOV
+- Add configuration documentation
