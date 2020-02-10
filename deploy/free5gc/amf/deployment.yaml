@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: amf
-          image: steven30801/free5gc-build:latest
+          image: steven30801/free5gc-build:stage-1
           imagePullPolicy: IfNotPresent
           command: ["/bin/bash"]
           args: ["-c", "/usr/src/free5gc-stage-1/free5gc-amfd"]
