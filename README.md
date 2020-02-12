@@ -130,9 +130,11 @@ Default configuration files for deployment locate in `helm-charts/configs/<targe
 
 See `helm-charts/configs/README.md` for more informations.
 
-## Dockerfile
+### User Interface
 
-The free5GC Dockerfiles, `build/free5gc-*`, are referred to [open5gs/open5gs](https://github.com/open5gs/open5gs/tree/master/docker)
+Web UI to subscriber database is running on port 30300. Default username and password are *admin* and *1423*.
+
+ONOS GUI is exposed on port 30181. Default username and password are *onos* and *rocks*.
 
 ## Troubleshooting
 
@@ -151,6 +153,10 @@ The problem takes place when network interface connecting to eNodeB has the smal
 **Workaround**
 
 Add a dummy address, other than loopback addresses, on the loopback interface to force Kernel set source address of ARP requests to it, since loopback interface has the smallest index number.
+
+## Dockerfile
+
+Please see [stevenchiu30801/bans-5gc-images](https://github.com/stevenchiu30801/bans-5gc-images.git).
 
 ## Reference
 [1] [P4-Enabled Bandwidth Management](https://ieeexplore.ieee.org/abstract/document/8892909)\
