@@ -4,6 +4,7 @@
 
 global:
   dbServiceDomain: mongo.default.svc.cluster.local
+  nrfAddr: 192.168.2.4
 
 amf:
   http:
@@ -12,25 +13,36 @@ amf:
     addr: 192.168.2.2
 
 ausf:
-  addr: 192.168.2.3
+  http:
+    addr: 192.168.2.3
 
 nrf:
-  addr: 192.168.2.4
+  http:
+    addr: 192.168.2.4
 
 nssf:
-  addr: 192.168.2.5
+  http:
+    addr: 192.168.2.5
 
 pcf:
-  addr: 192.168.2.6
+  http:
+    addr: 192.168.2.6
 
 smf:
-  addr: 192.168.2.7
+  http:
+    addr: 192.168.2.7
+  pfcp:
+    addr: 192.168.2.7
+    upfAddr: 192.168.2.10
 
 udm:
-  addr: 192.168.2.8
+  http:
+    addr: 192.168.2.8
+    udrAddr: 192.168.2.9
 
 udr:
-  addr: 192.168.2.9
+  http:
+    addr: 192.168.2.9
 
 upf:
   pfcp:

@@ -14,7 +14,7 @@ data:
       DefaultServiceIP: "{{ .Values.global.dbServiceDomain }}"
       sbi:
         scheme: https
-        ipv4Addr: {{ .Values.addr }}
+        ipv4Addr: {{ .Values.http.addr }}
         port: 29510
       DefaultPlmnId:
         mcc: "208"

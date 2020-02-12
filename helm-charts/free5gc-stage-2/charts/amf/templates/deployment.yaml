@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nrf.fullname" . }}
+  name: {{ include "amf.fullname" . }}
   labels:
-    {{- include "nrf.labels" . | nindent 4 }}
+    {{- include "amf.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "nrf.selectorLabels" . | nindent 6 }}
+      {{- include "amf.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "nrf.selectorLabels" . | nindent 8 }}
+        {{- include "amf.selectorLabels" . | nindent 8 }}
       annotations:
         cni.projectcalico.org/ipAddrs: "[\"{{ .Values.http.addr }}\"]"
     spec:
@@ -25,25 +25,23 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ["/bin/bash"]
-          args: ["-c", "./bin/nrf"]
-          stdin: true
-          tty: true
+          args: ["-c", "./bin/amf"]
           volumeMounts:
             - name: free5gc-config
               mountPath: /go/src/free5gc/config/free5GC.conf
               subPath: free5GC.conf
-            - name: nrf-config
-              mountPath: /go/src/free5gc/config/nrfcfg.conf
-              subPath: nrfcfg.conf
+            - name: amf-config
+              mountPath: /go/src/free5gc/config/amfcfg.conf
+              subPath: amfcfg.conf
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: free5gc-config
           configMap:
             name: free5gc-configmap
-        - name: nrf-config
+        - name: amf-config
           configMap:
-            name: nrf-configmap
+            name: amf-configmap
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
