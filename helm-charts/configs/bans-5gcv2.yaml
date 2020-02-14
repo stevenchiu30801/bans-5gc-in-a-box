@@ -1,5 +1,6 @@
 # global
-global: {}
+global:
+  nrfAddr: 192.168.2.4
 
 # in free5gc chart
 amf:
