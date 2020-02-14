@@ -11,7 +11,7 @@ data:
     configuration:
       MongoDBName: "free5gc"
       MongoDBUrl: "mongodb://{{ .Values.global.dbServiceDomain }}:27017"
-      DefaultServiceIP: "{{ .Values.global.dbServiceDomain }}"
+      DefaultServiceIP: "{{ .Values.http.addr }}"
       sbi:
         scheme: https
         ipv4Addr: {{ .Values.http.addr }}
