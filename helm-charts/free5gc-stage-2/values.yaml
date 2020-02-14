@@ -3,6 +3,8 @@
 # Declare variables to be passed into your templates.
 
 global:
+  image:
+    free5gc: {}
   dbServiceDomain: mongo.default.svc.cluster.local
   nrfAddr: 192.168.2.4
 

@@ -61,3 +61,14 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Web UI image
+*/}}
+{{- define "webui.image" -}}
+{{- if .Values.global.image.free5gc -}}
+{{ .Values.global.image.free5gc.repository }}:{{ .Values.global.image.free5gc.tag }}
+{{- else -}}
+{{ .Values.image.repository }}:{{ .Values.image.tag }}
+{{- end -}}
+{{- end -}}
