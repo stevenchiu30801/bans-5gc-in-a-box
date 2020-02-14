@@ -42,7 +42,7 @@ data:
               sd: 112233
       supportDnnList:
         - internet
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510
       security:
         integrityOrder:
           - NIA2

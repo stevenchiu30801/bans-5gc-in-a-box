@@ -16,4 +16,4 @@ data:
       mongodb:
         name: free5gc
         url: mongodb://{{ .Values.global.dbServiceDomain }}:27017
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510

@@ -17,7 +17,7 @@ data:
       serviceNameList:
         - nnssf_nsselection
         - nnssf_nssaiavailability
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510
       supportedPlmnList:
         - mcc: 208
           mnc: 93
@@ -35,12 +35,12 @@ data:
             sst: 1
             sd: 010203
           nsiInformationList:
-            - nrfId: https://{{ .Values.global.nrfAddr }}:29510
+            - nrfId: https://{{ .Values.global.nrf.addr }}:29510
         - snssai:
             sst: 1
             sd: 112233
           nsiInformationList:
-            - nrfId: https://{{ .Values.global.nrfAddr }}:29510
+            - nrfId: https://{{ .Values.global.nrf.addr }}:29510
       taList:
         - tai:
             plmnId:

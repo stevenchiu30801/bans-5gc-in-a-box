@@ -16,7 +16,7 @@ data:
         port: 29507
       timeFormat: 2019-01-02 15:04:05
       defaultBdtRefId: BdtPolicyId-
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510
       serviceNameList:
         - npcf-am-policy-control
         - npcf-smpolicycontrol

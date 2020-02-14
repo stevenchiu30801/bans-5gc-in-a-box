@@ -23,6 +23,6 @@ data:
       pfcp:
         addr: {{ .Values.pfcp.addr }}
       upf:
-        - addr: {{ .Values.pfcp.upfAddr }}
+        - addr: {{ .Values.upf.addr }}
       ue_subnet: 60.60.0.0/16
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510

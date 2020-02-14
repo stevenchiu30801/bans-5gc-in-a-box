@@ -15,7 +15,7 @@ data:
         port: 29509
       serviceNameList:
         - nausf-auth
-      nrfUri: https://{{ .Values.global.nrfAddr }}:29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510
       plmnSupportList:
         - mcc: 208
           mnc: 93

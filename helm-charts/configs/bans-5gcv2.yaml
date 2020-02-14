@@ -1,6 +1,7 @@
 # global
 global:
-  nrfAddr: 192.168.2.4
+  nrf:
+    addr: 192.168.2.4
 
 # in free5gc chart
 amf:
@@ -30,12 +31,14 @@ smf:
     addr: 192.168.2.7
   pfcp:
     addr: 192.168.2.7
-    upfAddr: 192.168.2.10
+  upf:
+    addr: 192.168.2.10
 
 udm:
   http:
     addr: 192.168.2.8
-    udrAddr: 192.168.2.9
+  udr:
+    addr: 192.168.2.9
 
 udr:
   http:

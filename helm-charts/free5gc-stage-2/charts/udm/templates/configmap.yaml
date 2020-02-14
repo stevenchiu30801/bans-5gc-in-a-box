@@ -26,10 +26,10 @@ data:
       
       udrclient:
         scheme: https
-        ipv4Addr: {{ .Values.http.udrAddr }}
+        ipv4Addr: {{ .Values.udr.addr }}
         port: 29504
     
       nrfclient:
         scheme: https
-        ipv4Addr: {{ .Values.global.nrfAddr }}
+        ipv4Addr: {{ .Values.global.nrf.addr }}
         port: 29510
