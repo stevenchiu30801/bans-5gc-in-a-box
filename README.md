@@ -18,7 +18,7 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 - Kubernetes v1.16.2
 - Calico v3.8
 - Helm 3.0.0
-- free5GC Stage 1
+- free5GC Stage 1 and Stage 2
 
 ## Hardware Requirement
 
@@ -28,7 +28,19 @@ All functions are containerized and deployed on [Kubernetes](https://github.com/
 
 ## Usage
 
-### Setup
+### Pre-install
+
+```ShellSession
+# On Kubernetes node
+
+sudo apt install -y make
+```
+
+### Environment Setup
+
+Currently there are no gNodeB and UE for standalone 5GC available in the market yet. Procedure tests are provided for free5GC Stage 2. Skip this section if deploying Stage 2.
+
+S1AP/SCTP protocol for 4GC is still remained between RAN and AMF in free5GC stage 1. Therefore, the following setup is required for field tests.
 
 The setup assumes the eNodeB is directly connected to the server. Please modify eNodeB network configuration to work with your network environment.
 
@@ -36,9 +48,6 @@ The setup assumes the eNodeB is directly connected to the server. Please modify 
 
 ```ShellSession
 # On Kubernetes node
-
-# Pre-install
-sudo apt install -y make
 
 # Configure network environment
 sudo ip address add 192.168.3.2/24 dev ${ENODEB_INTF}
@@ -60,30 +69,23 @@ NOTE 4: For deploying 5GC [with SDN-based transport](#deploying-5gc-with-sdn-bas
 
 #### With SR-IOV
 
-```ShellSession
-# On Kubernetes node
-
-# Pre-install
-sudo apt install -y make
-```
-
 Configure eNodeB settings
 - IP address in subnet 192.168.3.0/24 (excluding 192.168.3.2 and 192.168.3.6)
 - MME/AMF IP 192.168.3.2
 
 NOTE 1: 192.168.3.2 and 192.168.3.6 are AMF's and UPF's IP address respectively by default. See [Customizing Configuration](#customizing-configuration) section to customize two IP addresses.
 
-### Deploying 5GC Only
+### Deploying free5GC Stage 1 Only
 
 ```ShellSession
 # Deploy
 make
 
 # or
-make bans-5gc
+make bans-5gcv1
 ```
 
-### Deploying 5GC with SDN-based Transport
+### Deploying free5GC Stage 1 with SDN-based Transport
 
 A OvS-based Mininet pod is placed between eNodeB and UPF pod.
 
@@ -91,17 +93,17 @@ Open vSwitches are controlled by [ONOS](https://github.com/opennetworkinglab/ono
 
 ```ShellSession
 # Deploy
-make bans-5gc-ovs
+make bans-5gcv1-ovs
 ```
 
-### Deploying 5GC with BANS
+### Deploying free5GC Stage 1 with BANS
 
 ```ShellSession
 # Deploy
-make bans-5gc-bmv2
+make bans-5gcv1-bmv2
 
 # Override default slice configuration
-SLICE_CONFIG=/path/to/file make bans-5gc-bmv2
+SLICE_CONFIG=/path/to/file make bans-5gcv1-bmv2
 
 # Add new onos slice on existing deployment
 SLICE_CONFIG=/path/to/file make onos-bw-slice
@@ -109,15 +111,22 @@ SLICE_CONFIG=/path/to/file make onos-bw-slice
 
 Example slice configuration is placed at `deploy/slice.json`.
 
-### Deploying 5GC Only with SR-IOV
+### Deploying free5GC Stage 1 Only with SR-IOV
 
 ```ShellSession
 # Deploy
 # The argument `SRIOV_INTF` is required for server setup and creating SR-IOV resources
-SRIOV_INTF=devicename make bans-5gc-sriov
+SRIOV_INTF=devicename make bans-5gcv1-sriov
 ```
 
 NOTE 1: The *make* script performs server setup for SR-IOV, such as loading device's kernel module and creating required virtual functions, which is experimental and only be tested with Intel Ethernet adapters. Manually configure your server for SR-IOV devices if *make* fails at target *sriov-server-setup*.
+
+### Deploying free5GC Stage 2 Only
+
+```ShellSession
+# Deploy
+make bans-5gcv2
+```
 
 ### Customizing Configuration
 

@@ -43,6 +43,9 @@ bans-5gcv1-bmv2: bmv2-network-setup free5gc-stage-1 check-connect onos-bw-mgnt-a
 bans-5gcv1-sriov: BANSVALUES := $(HELMDIR)/configs/bans-5gcv1-sriov.yaml
 bans-5gcv1-sriov: sriov-setup free5gc-stage-1
 
+bans-5gcv2: BANSVALUES := $(HELMDIR)/configs/bans-5gcv2.yaml
+bans-5gcv2: free5gc-stage-2
+
 cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
@@ -262,7 +265,7 @@ add-onos-slice:
 del-onos-slices:
 	curl -u onos:rocks -X DELETE http://127.0.0.1:30181/onos/bandwidth-management/slices
 
-.PHONY: onos mininet mongo free5gc-stage-1
+.PHONY: onos mininet mongo free5gc-stage-1 free5gc-stage-2
 
 onos: $(M)/cluster-setup
 	helm upgrade $(HELM_ARGS) onos $(HELMDIR)/onos
@@ -276,6 +279,10 @@ mongo: $(M)/cluster-setup /nfsshare
 # https://www.free5gc.org/cluster
 free5gc-stage-1: $(M)/cluster-setup mongo
 	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc-stage-1
+	@echo "Deployment completed!"
+
+free5gc-stage-2: $(M)/cluster-setup mongo
+	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc-stage-2
 	@echo "Deployment completed!"
 
 .PHONY: reset-bans5gc
