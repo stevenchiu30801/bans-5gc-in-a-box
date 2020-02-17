@@ -16,3 +16,10 @@
 - Experimental server setup script for SR-IOV configuration
 - Add 5GC deployment only with SR-IOV
 - Add configuration documentation
+
+# Release-1.2
+
+- Rename free5GC Stage 1 target from bans-5gc to bans-5gcv1
+- Add free5GC Stage 2
+- Remove free5gc-stage-1 git submodule
+- Extract Docker images to repository [stevenchiu30801/bans-5gc-images](https://github.com/stevenchiu30801/bans-5gc-images)
