@@ -33,8 +33,8 @@ spec:
               mountPath: /go/src/free5gc/config/free5GC.conf
               subPath: free5GC.conf
             - name: upf-config
-              mountPath: /go/src/free5gc/src/upf/build/config/upfcfg.conf
-              subPath: upfcfg.conf
+              mountPath: /go/src/free5gc/src/upf/build/config/upfcfg.yaml
+              subPath: upfcfg.yaml
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

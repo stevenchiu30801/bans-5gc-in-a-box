@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: upf-configmap
 data:
-  upfcfg.conf: |
+  upfcfg.yaml: |
     info:
       version: 1.0.0
       description: UPF configuration
