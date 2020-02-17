@@ -126,6 +126,16 @@ NOTE 1: The *make* script performs server setup for SR-IOV, such as loading devi
 ```ShellSession
 # Deploy
 make bans-5gcv2
+
+# Procedure test
+
+# Enter RANSIM pod
+export RANSIM_POD=$( kubectl get pod -l app.kubernetes.io/instance=free5gc -l app.kubernetes.io/name=ransim -o jsonpath='{.items[0].metadata.name}' )
+kubectl exec -ti $RANSIM_POD bash
+
+# Run procedure test in RANSIM pod
+cd src/test
+go test -v -vet=off -run TestRegistration
 ```
 
 ### Customizing Configuration
