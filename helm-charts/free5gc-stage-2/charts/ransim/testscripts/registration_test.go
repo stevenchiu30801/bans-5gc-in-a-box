@@ -2,17 +2,17 @@ package test_test
 
 import (
 	"encoding/hex"
-	"free5gc/lib/CommonConsumerTestData/UDM/TestGenAuthData"
-	"free5gc/lib/CommonConsumerTestData/UDR/TestRegistrationProcedure"
-	"free5gc/lib/MongoDBLibrary"
-	"free5gc/lib/nas/nasMessage"
-	"free5gc/lib/nas/nasTestpacket"
-	"free5gc/lib/nas/nasType"
-	"free5gc/lib/ngap"
-	"free5gc/lib/openapi/models"
+	"gofree5gc/lib/CommonConsumerTestData/UDM/TestGenAuthData"
+	"gofree5gc/lib/CommonConsumerTestData/UDR/TestRegistrationProcedure"
+	"gofree5gc/lib/MongoDBLibrary"
+	"gofree5gc/lib/nas/nasMessage"
+	"gofree5gc/lib/nas/nasTestpacket"
+	"gofree5gc/lib/nas/nasType"
+	"gofree5gc/lib/ngap"
+	"gofree5gc/lib/openapi/models"
 
-	// "free5gc/src/ausf/ausf_context"
-	"free5gc/src/test"
+	// "gofree5gc/src/ausf/ausf_context"
+	"gofree5gc/src/test"
 	"net"
 	"testing"
 	"time"
@@ -52,6 +52,10 @@ func getSmfSelectionSubscriptionData() (smfSelData models.SmfSelectionSubscripti
 	return TestRegistrationProcedure.TestSmfSelDataTable[TestRegistrationProcedure.FREE5GC_CASE]
 }
 
+func getAmPolicyData() (amPolicyData models.AmPolicyData) {
+	return TestRegistrationProcedure.TestAmPolicyDataTable[TestRegistrationProcedure.FREE5GC_CASE]
+}
+
 // Registration
 func TestRegistration(t *testing.T) {
 	var n int
@@ -64,7 +68,7 @@ func TestRegistration(t *testing.T) {
 	MongoDBLibrary.SetMongoDB("free5gc", "mongodb://{{ .Values.global.dbServiceDomain }}:27017")
 
 	// RAN connect to AMF
-	conn, err := conntectToAmf("{{.Values.amf.ngap.addr}}", "{{.Values.addr}}", 38412, 9487)
+	conn, err := connectToAmf("{{.Values.amf.ngap.addr}}", "{{.Values.addr}}", 38412, 9487)
 	assert.Nil(t, err)
 
 	// RAN connect to UPF
@@ -106,14 +110,20 @@ func TestRegistration(t *testing.T) {
 		getData := test.GetSmfSelectionSubscriptionDataFromMongoDB(ue.Supi, servingPlmnId)
 		assert.NotNil(t, getData)
 	}
+	{
+		amPolicyData := getAmPolicyData()
+		test.InsertAmPolicyDataToMongoDB(ue.Supi, amPolicyData)
+		getData := test.GetAmPolicyDataFromMongoDB(ue.Supi)
+		assert.NotNil(t, getData)
+	}
 
 	// send InitialUeMessage(Registration Request)(imsi-2089300007487)
 	mobileIdentity5GS := nasType.MobileIdentity5GS{
 		Len:    12, // suci
 		Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
 	}
-	pdu := nasTestpacket.GetRegistrationRequest(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil)
-	sendMsg, err = test.GetInitialUEMessage(ue.RanUeNgapId, pdu, "")
+	registrationRequest := nasTestpacket.GetRegistrationRequestWith5GMM(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil)
+	sendMsg, err = test.GetInitialUEMessage(ue.RanUeNgapId, registrationRequest, "")
 	assert.Nil(t, err)
 	_, err = conn.Write(sendMsg)
 	assert.Nil(t, err)
@@ -131,7 +141,7 @@ func TestRegistration(t *testing.T) {
 	resStat := ue.DeriveRESstarAndSetKey(ue.AuthenticationSubs, rand[:], "5G:mnc093.mcc208.3gppnetwork.org")
 
 	// send NAS Authentication Response
-	pdu = nasTestpacket.GetAuthenticationResponse(resStat, "")
+	pdu := nasTestpacket.GetAuthenticationResponse(resStat, "")
 	sendMsg, err = test.GetUplinkNASTransport(ue.AmfUeNgapId, ue.RanUeNgapId, pdu)
 	assert.Nil(t, err)
 	_, err = conn.Write(sendMsg)
@@ -144,7 +154,7 @@ func TestRegistration(t *testing.T) {
 	assert.Nil(t, err)
 
 	// send NAS Security Mode Complete Msg
-	pdu = nasTestpacket.GetSecurityModeComplete()
+	pdu = nasTestpacket.GetSecurityModeComplete(registrationRequest)
 	pdu, err = test.EncodeNasPduWithSecurity(ue, pdu)
 	assert.Nil(t, err)
 	sendMsg, err = test.GetUplinkNASTransport(ue.AmfUeNgapId, ue.RanUeNgapId, pdu)

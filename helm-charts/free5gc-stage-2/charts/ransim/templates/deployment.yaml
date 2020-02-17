@@ -29,10 +29,10 @@ spec:
           tty: true
           volumeMounts:
             - name: test-scripts
-              mountPath: /go/src/free5gc/src/test/registration_test.go
+              mountPath: /root/gofree5gc/src/test/registration_test.go
               subPath: registration_test.go
             - name: test-scripts
-              mountPath: /go/src/free5gc/src/test/ngsetup_test.go
+              mountPath: /root/gofree5gc/src/test/ngsetup_test.go
               subPath: ngsetup_test.go
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

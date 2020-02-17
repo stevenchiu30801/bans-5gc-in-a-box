@@ -20,9 +20,9 @@ data:
         ipv4Addr: {{ .Values.http.addr }}
         port: 29503
         tls:
-          log: free5gc/udmsslkey.log
-          pem: free5gc/support/TLS/udm.pem
-          key: free5gc/support/TLS/udm.key
+          log: gofree5gc/udmsslkey.log
+          pem: gofree5gc/support/TLS/udm.pem
+          key: gofree5gc/support/TLS/udm.key
       
       udrclient:
         scheme: https
@@ -33,3 +33,4 @@ data:
         scheme: https
         ipv4Addr: {{ .Values.global.nrf.addr }}
         port: 29510
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510

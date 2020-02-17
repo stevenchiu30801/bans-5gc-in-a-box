@@ -15,8 +15,8 @@ data:
         ipv4Addr: {{ .Values.http.addr }}
         port: 29531
       serviceNameList:
-        - nnssf_nsselection
-        - nnssf_nssaiavailability
+        - nnssf-nsselection
+        - nnssf-nssaiavailability
       nrfUri: https://{{ .Values.global.nrf.addr }}:29510
       supportedPlmnList:
         - mcc: 208

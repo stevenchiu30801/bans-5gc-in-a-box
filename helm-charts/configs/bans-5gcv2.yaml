@@ -1,5 +1,9 @@
 # global
 global:
+  image:
+    free5gc:
+      repository: free5gc-private-build
+      tag: latest
   nrf:
     addr: 192.168.2.4
 
@@ -32,7 +36,12 @@ smf:
   pfcp:
     addr: 192.168.2.7
   upf:
-    addr: 192.168.2.10
+    pfcp:
+      addr: 192.168.2.10
+    gtpu:
+      addr: 192.168.2.10
+  gnb:
+    addr: 192.168.2.11
 
 udm:
   http:
