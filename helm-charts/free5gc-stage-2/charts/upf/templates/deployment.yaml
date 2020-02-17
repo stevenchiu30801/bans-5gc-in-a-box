@@ -4,6 +4,8 @@ metadata:
   name: {{ include "upf.fullname" . }}
   labels:
     {{- include "upf.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook-weight": "-5"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

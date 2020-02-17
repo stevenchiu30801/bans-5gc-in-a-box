@@ -4,6 +4,8 @@ metadata:
   name: {{ include "smf.fullname" . }}
   labels:
     {{- include "smf.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook-weight": "5"
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
