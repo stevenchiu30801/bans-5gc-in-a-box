@@ -24,10 +24,10 @@ spec:
           args: ["-c", "/usr/src/free5gc-stage-1/free5gc-amfd"]
           stdin: true
           tty: true
-          ports:
-            - name: sctp
-              containerPort: 36412
-              protocol: SCTP
+          # ports:
+          #   - name: sctp
+          #     containerPort: 36412
+          #     protocol: SCTP
           volumeMounts:
             - name: free5gc-config
               mountPath: /usr/src/free5gc-stage-1/install/etc/free5gc/free5gc.conf
