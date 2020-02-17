@@ -1,58 +1,16 @@
 package test_test
 
 import (
-	// "flag"
 	"fmt"
 	"free5gc/lib/ngap"
 	"free5gc/lib/ngap/ngapSctp"
-	// "free5gc/lib/path_util"
-	"free5gc/src/amf/amf_service"
-	"free5gc/src/app"
-	"free5gc/src/ausf/ausf_service"
-	"free5gc/src/nrf/nrf_service"
-	"free5gc/src/nssf/nssf_service"
-	"free5gc/src/pcf/pcf_service"
-	"free5gc/src/smf/smf_service"
 	"free5gc/src/test"
-	"free5gc/src/udm/udm_service"
-	"free5gc/src/udr/udr_service"
-	// "log"
 	"net"
 	"testing"
-	// "time"
 
 	"github.com/ishidawataru/sctp"
 	"github.com/stretchr/testify/assert"
-	// "github.com/urfave/cli"
 )
-
-var NFs = []app.NetworkFunction{
-	&nrf_service.NRF{},
-	&amf_service.AMF{},
-	&smf_service.SMF{},
-	&udr_service.UDR{},
-	&pcf_service.PCF{},
-	&udm_service.UDM{},
-	&nssf_service.NSSF{},
-	&ausf_service.AUSF{},
-}
-
-// func init() {
-// 	app.AppInitializeWillInitialize("")
-// 	flagSet := flag.NewFlagSet("free5gc", 0)
-// 	flagSet.String("smfcfg", "", "SMF Config Path")
-// 	cli := cli.NewContext(nil, flagSet, nil)
-// 	err := cli.Set("smfcfg", path_util.Gofree5gcPath("free5gc/config/smfcfg.test.conf"))
-// 	if err != nil {
-// 		log.Fatal("SMF test config error")
-// 		return
-// 	}
-// 	for _, service := range NFs {
-// 		service.Initialize(cli)
-// 		go service.Start()
-// 		time.Sleep(200 * time.Millisecond)
-// 	}
-// }
 
 func getNgapIp(amfIP, ranIP string, amfPort, ranPort int) (amfAddr, ranAddr *sctp.SCTPAddr, err error) {
 	ips := []net.IPAddr{}
