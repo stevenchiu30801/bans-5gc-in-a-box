@@ -47,6 +47,7 @@ cluster: $(M)/kubeadm /usr/local/bin/helm
 install: /usr/bin/kubeadm /usr/local/bin/helm
 preference: $(M)/preference
 
+multus-setup: $(M)/multus-init
 sriov-setup: $(M)/sriov-init $(M)/multus-init
 
 $(M)/setup:
