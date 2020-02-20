@@ -13,7 +13,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-addr: 192.168.2.12
+addr: 192.168.2.11
 amf:
   ngap:
     addr: 192.168.2.2

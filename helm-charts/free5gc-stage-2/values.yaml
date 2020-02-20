@@ -54,3 +54,12 @@ upf:
     addr: 192.168.2.10
   gtpu:
     addr: 192.168.2.10
+
+ransim:
+  addr: 192.168.2.11
+  amf:
+    ngap:
+      addr: 192.168.2.2
+  upf:
+    gtpu:
+      addr: 192.168.2.10
