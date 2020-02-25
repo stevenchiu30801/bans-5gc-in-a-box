@@ -38,7 +38,7 @@ func getNgapIp(amfIP, ranIP string, amfPort, ranPort int) (amfAddr, ranAddr *sct
 	return
 }
 
-func conntectToAmf(amfIP, ranIP string, amfPort, ranPort int) (*sctp.SCTPConn, error) {
+func connectToAmf(amfIP, ranIP string, amfPort, ranPort int) (*sctp.SCTPConn, error) {
 	amfAddr, ranAddr, err := getNgapIp(amfIP, ranIP, amfPort, ranPort)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func TestNGSetup(t *testing.T) {
 	var recvMsg = make([]byte, 2048)
 
 	// RAN connect to AMF
-	conn, err := conntectToAmf("127.0.0.1", "127.0.0.1", 38412, 9487)
+	conn, err := connectToAmf("127.0.0.1", "127.0.0.1", 38412, 9487)
 	assert.Nil(t, err)
 
 	// send NGSetupRequest Msg
