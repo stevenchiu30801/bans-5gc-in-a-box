@@ -303,6 +303,8 @@ reset-bans5gc:
 	done
 	sudo rm -rf /var/lib/cni/networks/mn*
 	-for br in /sys/class/net/mn*; do sudo ip link delete `basename $$br` type bridge; done
+	# Drop collections created by free5GC Stage 2 in Mongo DB
+	$(MAKEDIR)/scripts/clear_mongo.sh
 	@echo "Reset completed!"
 
 .PHONY: reset-kubeadm
