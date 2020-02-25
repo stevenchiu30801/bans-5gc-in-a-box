@@ -63,11 +63,11 @@ func TestRegistration(t *testing.T) {
 	var recvMsg = make([]byte, 2048)
 
 	// set MongoDB
-	//// HELM: Remove spaces in substitution to avoid unclosed action error
-	////       It seems to only occur when multiple substitution in one line
 	MongoDBLibrary.SetMongoDB("free5gc", "mongodb://{{ .Values.global.dbServiceDomain }}:27017")
 
 	// RAN connect to AMF
+	//// HELM: Remove spaces in substitution to avoid unclosed action error
+	////       It seems to only occur when multiple substitution in one line
 	conn, err := connectToAmf("{{.Values.amf.ngap.addr}}", "{{.Values.addr}}", 38412, 9487)
 	assert.Nil(t, err)
 
@@ -228,9 +228,11 @@ func TestRegistration(t *testing.T) {
 		TotalLen: 48,
 		TTL:      64,
 		Src:      net.ParseIP("60.60.0.1").To4(),
-		Dst:      net.ParseIP("60.60.0.100").To4(),
+		// Dst:      net.ParseIP("60.60.0.100").To4(),
+		Dst:      net.ParseIP("8.8.8.8").To4(),
 		ID:       1,
-		Checksum: 0x01f0,
+		// Checksum: 0x01f0,
+		Checksum: 0x2e80,
 	}
 
 	v4HdrBuf, err := ipv4hdr.Marshal()
