@@ -1,3 +1,41 @@
+{{- if .Values.global.enableSlices }}
+{{- range $i, $junk := until (.Values.global.numOfSlices|int) }}
+{{- with $ }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: upf-slice{{ add $i 1 }}-configmap
+  annotations:
+    "helm.sh/hook-weight": "-5"
+data:
+  upfcfg.yaml: |
+    info:
+      version: 1.0.0
+      description: UPF configuration
+    
+    configuration:
+      # debugLevel: panic|fatal|error|warn|info|debug|trace
+      debugLevel: info
+    
+      pfcp:
+        - addr: {{ printf "192.168.2.%d" (add (mul $i 2) 13) }}
+    
+      gtpu:
+        - addr: {{ printf "192.168.2.%d" (add (mul $i 2) 13) }}
+        # [optional] gtpu.name
+        # - name: upf.5gc.nctu.me
+        # [optional] gtpu.ifname
+        # - ifname: gtpif
+    
+      apn_list:
+        - apn: internet
+          cidr: 60.60.0.0/24
+          # [optional] apn_list[*].natifname
+          # natifname: eth0
+{{- end }}
+{{- end }}
+{{- else }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -29,3 +67,4 @@ data:
           cidr: 60.60.0.0/24
           # [optional] apn_list[*].natifname
           # natifname: eth0
+{{- end }}

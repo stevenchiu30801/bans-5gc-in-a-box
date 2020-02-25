@@ -6,6 +6,15 @@ global:
       tag: latest
   nrf:
     addr: 192.168.2.4
+  enableSlices: false
+  numOfSlices: 2
+  slices:
+    1:
+      - sst: 1
+        sd: "010203"
+    2:
+      - sst: 1
+        sd: "112233"
 
 # in free5gc chart
 amf:

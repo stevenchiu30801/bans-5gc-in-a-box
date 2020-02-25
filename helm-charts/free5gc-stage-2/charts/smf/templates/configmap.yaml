@@ -1,3 +1,54 @@
+{{- if .Values.global.enableSlices }}
+{{- range $i, $junk := until (.Values.global.numOfSlices|int) }}
+{{- with $ }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smf-slice{{ add $i 1 }}-configmap
+data:
+  smfcfg.conf: |
+    info:
+      version: 1.0.0
+      description: AMF initial local configuration
+    
+    configuration:
+      smfName: SMF
+      sbi:
+        scheme: https
+        ipv4Addr: {{ printf "192.168.2.%d" (add (mul $i 2) 12) }}
+        port: 29502
+        tls:
+          key: gofree5gc/support/TLS/smf.key
+          pem: gofree5gc/support/TLS/smf.pem
+      serviceNameList:
+        - nsmf-pdusession
+        - nsmf-event-exposure
+      pfcp:
+        addr: {{ printf "192.168.2.%d" (add (mul $i 2) 12) }}
+      userplane_information:
+        up_nodes:
+          gNB:
+            type: AN
+            an_ip: {{ .Values.gnb.addr }}
+          UPF:
+            type: UPF
+            node_id: {{ printf "192.168.2.%d" (add (mul $i 2) 13) }}
+            up_resource_ip: {{ printf "192.168.2.%d" (add (mul $i 2) 13) }}
+        links:
+          - A: gNB
+            B: UPF
+      ue_subnet: 60.60.0.0/16
+      nrfUri: https://{{ .Values.global.nrf.addr }}:29510
+      snssaiList:
+{{- range $key, $val := .Values.global.slices }}
+{{- if eq $key (printf "%d" (add $i 1)) }}
+{{- toYaml $val | nindent 8 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- else }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -36,3 +87,4 @@ data:
             B: UPF
       ue_subnet: 60.60.0.0/16
       nrfUri: https://{{ .Values.global.nrf.addr }}:29510
+{{- end }}
