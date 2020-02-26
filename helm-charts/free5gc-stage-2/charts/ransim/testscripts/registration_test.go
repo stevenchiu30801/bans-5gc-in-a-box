@@ -13,6 +13,7 @@ import (
 
 	// "free5gc/src/ausf/ausf_context"
 	"free5gc/src/test"
+
 	"net"
 	"testing"
 	"time"
@@ -20,6 +21,8 @@ import (
 	"golang.org/x/net/icmp"
 	"golang.org/x/net/ipv4"
 
+	"github.com/google/gopacket"
+	"github.com/google/gopacket/layers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -50,6 +53,50 @@ func getAccessAndMobilitySubscriptionData() (amData models.AccessAndMobilitySubs
 
 func getSmfSelectionSubscriptionData() (smfSelData models.SmfSelectionSubscriptionData) {
 	return TestRegistrationProcedure.TestSmfSelDataTable[TestRegistrationProcedure.FREE5GC_CASE]
+}
+
+func checksum(data []byte) uint16 {
+	var (
+		sum    uint32
+		length int = len(data) - 1
+	)
+
+	for i := 0; i < length; i += 2 {
+		sum += uint32(data[i]) << 8
+		sum += uint32(data[i+1])
+	}
+
+	if len(data)%2 == 1 {
+		sum += uint32(data[length]) << 8
+	}
+
+	sum += sum >> 16
+
+	return ^uint16(sum)
+}
+
+func buildGTPHeader(teid uint32, seq uint16) ([]byte, error) {
+	const length uint16 = 52
+	gtpheader := &layers.GTPv1U{
+		Version:             1,
+		ProtocolType:        1,
+		Reserved:            0,
+		ExtensionHeaderFlag: false,
+		SequenceNumberFlag:  true,
+		NPDUFlag:            false,
+		MessageType:         255,
+		MessageLength:       length,
+		TEID:                teid,
+		SequenceNumber:      seq,
+	}
+	buf := gopacket.NewSerializeBuffer()
+	opts := gopacket.SerializeOptions{}
+	err := gtpheader.SerializeTo(buf, opts)
+
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 // Registration
@@ -203,46 +250,57 @@ func TestRegistration(t *testing.T) {
 	// wait 1s
 	time.Sleep(1 * time.Second)
 
-	// Send the dummy packet
-	// ping IP(tunnel IP) from 60.60.0.2(127.0.0.1) to 60.60.0.20(127.0.0.8)
-	gtpHdr, err := hex.DecodeString("32ff00340000000100000000")
-	assert.Nil(t, err)
-	icmpData, err := hex.DecodeString("8c870d0000000000101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f3031323334353637")
-	assert.Nil(t, err)
+	// send ICMP packets
+	for i := 0; i < 5; i++ {
+		// build GTP header
+		gtpHdrBuf, err := buildGTPHeader(1, uint16(i))
+		assert.Nil(t, err)
 
-	ipv4hdr := ipv4.Header{
-		Version:  4,
-		Len:      20,
-		Protocol: 1,
-		Flags:    0,
-		TotalLen: 48,
-		TTL:      64,
-		Src:      net.ParseIP("60.60.0.1").To4(),
-		// Dst:      net.ParseIP("60.60.0.100").To4(),
-		Dst:      net.ParseIP("8.8.8.8").To4(),
-		ID:       1,
-		// Checksum: 0x01f0,
-		Checksum: 0x2e80,
+		// build IPv4 header
+		ipv4hdr := ipv4.Header{
+			Version:  4,
+			Len:      20,
+			Protocol: 1,
+			Flags:    0,
+			TotalLen: 48,
+			TTL:      64,
+			Src:      net.ParseIP("60.60.0.1").To4(),
+			Dst:      net.ParseIP("8.8.8.8").To4(),
+			ID:       1,
+			Checksum: 0,
+		}
+		v4HdrBuf, err := ipv4hdr.Marshal()
+		assert.Nil(t, err)
+
+		// compute IP checksum
+		ipv4hdr.Checksum = int(checksum(v4HdrBuf))
+		v4HdrBuf, err = ipv4hdr.Marshal()
+		assert.Nil(t, err)
+
+		// build ICMP packet
+		icmpData, err := hex.DecodeString("8c870d0000000000101112131415161718191a1b")
+		assert.Nil(t, err)
+
+		icmpPacket := icmp.Message{
+			Type: ipv4.ICMPTypeEcho, Code: 0,
+			Body: &icmp.Echo{
+				ID: 0, Seq: i,
+				Data: icmpData,
+			},
+		}
+		icmpBuf, err := icmpPacket.Marshal(nil)
+		assert.Nil(t, err)
+
+		// concat headers and payload
+		gtpPacket := append(gtpHdrBuf, v4HdrBuf...)
+		gtpPacket = append(gtpPacket, icmpBuf...)
+
+		_, err = upfConn.Write(gtpPacket)
+		assert.Nil(t, err)
+
+		// wait one second interval
+		time.Sleep(1 * time.Second)
 	}
-
-	v4HdrBuf, err := ipv4hdr.Marshal()
-	assert.Nil(t, err)
-	tt := append(gtpHdr, v4HdrBuf...)
-	assert.Nil(t, err)
-
-	m := icmp.Message{
-		Type: ipv4.ICMPTypeEcho, Code: 0,
-		Body: &icmp.Echo{
-			ID: 12394, Seq: 1,
-			Data: icmpData,
-		},
-	}
-	b, err := m.Marshal(nil)
-	assert.Nil(t, err)
-	b[2] = 0xaf
-	b[3] = 0x88
-	_, err = upfConn.Write(append(tt, b...))
-	assert.Nil(t, err)
 
 	// delete test data
 	test.DelAuthSubscriptionToMongoDB(ue.Supi)
