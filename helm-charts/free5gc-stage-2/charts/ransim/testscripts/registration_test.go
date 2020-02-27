@@ -14,6 +14,7 @@ import (
 	// "gofree5gc/src/ausf/ausf_context"
 	"gofree5gc/src/test"
 
+	"fmt"
 	"net"
 	"testing"
 	"time"
@@ -27,6 +28,11 @@ import (
 )
 
 const ranIpAddr string = "{{ .Values.addr }}"
+
+const (
+	icmpCnt int    = 5
+	icmpDst string = "8.8.8.8"
+)
 
 func getAuthSubscription() (authSubs models.AuthenticationSubscription) {
 	authSubs.PermanentKey = &models.PermanentKey{
@@ -261,7 +267,8 @@ func TestRegistration(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	// send ICMP packets
-	for i := 0; i < 5; i++ {
+	fmt.Printf("Send %d ICMP packet(s) to %s\n", icmpCnt, icmpDst)
+	for i := 0; i < icmpCnt; i++ {
 		// build GTP header
 		gtpHdrBuf, err := buildGTPHeader(1, uint16(i))
 		assert.Nil(t, err)
@@ -275,7 +282,7 @@ func TestRegistration(t *testing.T) {
 			TotalLen: 48,
 			TTL:      64,
 			Src:      net.ParseIP("60.60.0.1").To4(),
-			Dst:      net.ParseIP("8.8.8.8").To4(),
+			Dst:      net.ParseIP(icmpDst).To4(),
 			ID:       1,
 			Checksum: 0,
 		}
@@ -307,6 +314,38 @@ func TestRegistration(t *testing.T) {
 
 		_, err = upfConn.Write(gtpPacket)
 		assert.Nil(t, err)
+		sentTime := time.Now()
+
+		go func() {
+			// receive icmp response
+			n, err = upfConn.Read(recvMsg)
+			assert.Nil(t, err)
+			recvTime := time.Now()
+			elapsed := recvTime.Sub(sentTime)
+
+			// decode packet
+			var gtpu layers.GTPv1U
+			var ip4 layers.IPv4
+			var icmp4 layers.ICMPv4
+			var payload gopacket.Payload
+			parser := gopacket.NewDecodingLayerParser(layers.LayerTypeGTPv1U, &gtpu, &ip4, &icmp4, &payload)
+			decoded := []gopacket.LayerType{}
+			err = parser.DecodeLayers(recvMsg, &decoded)
+			var ttl uint8
+			for _, layerType := range decoded {
+				switch layerType {
+				case layers.LayerTypeIPv4:
+					ttl = ip4.TTL
+				case layers.LayerTypeICMPv4:
+					if icmp4.Seq == uint16(i) {
+						fmt.Printf("%d bytes from %s: icmp_seq=%d ttl=%d time=%.2f ms\n", len(payload), icmpDst, i, ttl, float64(elapsed)/float64(time.Millisecond))
+					}
+				}
+			}
+			if err != nil {
+				fmt.Println("  Error encountered:", err)
+			}
+		}()
 
 		// wait one second interval
 		time.Sleep(1 * time.Second)
