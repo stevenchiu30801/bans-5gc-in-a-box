@@ -284,6 +284,7 @@ free5gc-stage-1: $(M)/cluster-setup mongo
 
 free5gc-stage-2: $(M)/cluster-setup mongo
 	helm upgrade $(HELM_ARGS) free5gc $(HELMDIR)/free5gc-stage-2
+	$(MAKEDIR)/scripts/fix_order.sh
 	@echo "Deployment completed!"
 
 .PHONY: reset-bans5gc
