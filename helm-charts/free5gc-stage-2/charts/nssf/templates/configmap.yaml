@@ -49,7 +49,13 @@ data:
             tac: 1
           accessType: 3GPP_ACCESS
           supportedSnssaiList:
+{{- if .Values.global.enableSlices }}
+{{- range $key, $val := .Values.global.slices }}
+{{- toYaml $val | nindent 12 }}
+{{- end }}
+{{- else }}
             - sst: 1
               sd: 010203
             - sst: 1
               sd: 112233
+{{- end }}

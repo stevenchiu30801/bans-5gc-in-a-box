@@ -16,10 +16,12 @@ spec:
   selector:
     matchLabels:
       {{- include "smf.selectorLabels" . | nindent 6 }}
+      bans.io/slice: slice{{ add $i 1 }}
   template:
     metadata:
       labels:
         {{- include "smf.selectorLabels" . | nindent 8 }}
+        bans.io/slice: slice{{ add $i 1 }}
       annotations:
         cni.projectcalico.org/ipAddrs: "[\"{{ printf "192.168.2.%d" (add (mul $i 2) 12) }}\"]"
     spec:
