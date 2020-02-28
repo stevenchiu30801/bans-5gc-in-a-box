@@ -9,11 +9,13 @@ import (
 	"gofree5gc/lib/nas/nasTestpacket"
 	"gofree5gc/lib/nas/nasType"
 	"gofree5gc/lib/ngap"
+	"gofree5gc/lib/ngap/ngapType"
 	"gofree5gc/lib/openapi/models"
 
 	// "gofree5gc/src/ausf/ausf_context"
 	"gofree5gc/src/test"
 
+	"flag"
 	"fmt"
 	"net"
 	"testing"
@@ -29,10 +31,19 @@ import (
 
 const ranIpAddr string = "{{ .Values.addr }}"
 
-const (
-	icmpCnt int    = 5
-	icmpDst string = "8.8.8.8"
+var (
+	sst     int
+	sd      string
+	icmpCnt int
+	icmpDst string
 )
+
+func init() {
+	flag.IntVar(&sst, "sst", 1, "SST of S-NSSAI")
+	flag.StringVar(&sd, "sd", "010203", "SD of S-NSSAI")
+	flag.IntVar(&icmpCnt, "icmp-cnt", 5, "ICMP packet count to be sent")
+	flag.StringVar(&icmpDst, "icmp-dst", "8.8.8.8", "Destination address of ICMP packets")
+}
 
 func getAuthSubscription() (authSubs models.AuthenticationSubscription) {
 	authSubs.PermanentKey = &models.PermanentKey{
@@ -122,10 +133,6 @@ func TestRegistration(t *testing.T) {
 	//// HELM: Remove spaces in substitution to avoid unclosed action error
 	//// It seems to only occur when multiple substitution in one line
 	conn, err := connectToAmf("{{.Values.amf.ngap.addr}}", "{{.Values.addr}}", 38412, 9487)
-	assert.Nil(t, err)
-
-	// RAN connect to UPF
-	upfConn, err := connectToUpf(ranIpAddr, "{{ .Values.upf.gtpu.addr }}", 2152, 2152)
 	assert.Nil(t, err)
 
 	// send NGSetupRequest Msg
@@ -240,8 +247,8 @@ func TestRegistration(t *testing.T) {
 	// send GetPduSessionEstablishmentRequest Msg
 
 	sNssai := models.Snssai{
-		Sst: 1,
-		Sd:  "010203",
+		Sst: int32(sst),
+		Sd:  sd,
 	}
 	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(10, nasMessage.ULNASTransportRequestTypeInitialRequest, "internet", &sNssai)
 	pdu, err = test.EncodeNasPduWithSecurity(ue, pdu)
@@ -254,8 +261,29 @@ func TestRegistration(t *testing.T) {
 	// recieve 12. NGAP-PDU Session Resource Setup Request(DL nas transport((NAS msg-PDU session setup Accept)))
 	n, err = conn.Read(recvMsg)
 	assert.Nil(t, err)
-	_, err = ngap.Decoder(recvMsg[:n])
+	ngapPduMsg, err := ngap.Decoder(recvMsg[:n])
 	assert.Nil(t, err)
+
+	// parse UPF address from NGAP-PDU Session Resource Setup Request
+	var upfAddr string
+	// fmt.Printf("%+v\n", ngapPduMsg.InitiatingMessage.Value)
+	iEList := ngapPduMsg.InitiatingMessage.Value.PDUSessionResourceSetupRequest.ProtocolIEs.List
+	for i := 0; i < len(iEList); i++ {
+		// fmt.Printf("%+v\n", iEList[i].Id)
+		// fmt.Printf("%+v\n", iEList[i].Value)
+		if iEList[i].Value.Present == ngapType.PDUSessionResourceSetupRequestIEsPresentPDUSessionResourceSetupListSUReq {
+			sUReqList := iEList[i].Value.PDUSessionResourceSetupListSUReq.List
+			for j := 0; j < len(sUReqList); j++ {
+				// fmt.Printf("%+v\n", sUReqList[j])
+				if sUReqList[j].PDUSessionID.Value == int64(10) {
+					// fmt.Printf("%+v\n", sUReqList[j].PDUSessionResourceSetupRequestTransfer)
+					// TODO: unmarshal aper.OctetString and get TransportLayerAddress in field ULNGUUPTNLInformation
+					upfAddr = net.IP(sUReqList[j].PDUSessionResourceSetupRequestTransfer[9:13]).String()
+					break
+				}
+			}
+		}
+	}
 
 	// send 14. NGAP-PDU Session Resource Setup Response
 	sendMsg, err = test.GetPDUSessionResourceSetupResponse(ue.AmfUeNgapId, ue.RanUeNgapId, ranIpAddr)
@@ -265,6 +293,11 @@ func TestRegistration(t *testing.T) {
 
 	// wait 1s
 	time.Sleep(1 * time.Second)
+
+	// RAN connect to UPF
+	upfConn, err := connectToUpf(ranIpAddr, upfAddr, 2152, 2152)
+	assert.Nil(t, err)
+	fmt.Printf("UPF %s connected\n", upfAddr)
 
 	// send ICMP packets
 	fmt.Printf("Send %d ICMP packet(s) to %s\n", icmpCnt, icmpDst)
