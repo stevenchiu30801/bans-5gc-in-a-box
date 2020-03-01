@@ -72,3 +72,46 @@ NSSF image
 {{ .Values.image.repository }}:{{ .Values.image.tag }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+S-NSSAI List
+*/}}
+{{- define "nssf.snssaiList" }}
+{{- if .Values.global.enableSlices }}
+{{- range $key, $val := .Values.global.slices }}
+{{- toYaml $val | nindent 0 }}
+{{- end }}
+{{- else }}
+- sst: 1
+  sd: 010203
+- sst: 1
+  sd: 112233
+{{- end }}
+{{- end }}
+
+{{/*
+NSI List
+*/}}
+{{- define "nssf.nsiList" }}
+{{- if .Values.global.enableSlices }}
+{{- range $key, $val := .Values.global.slices }}
+{{- range $val }}
+- snssai:
+    {{- toYaml . | nindent 4 }}
+  nsiInformationList:
+    - nrfId: https://{{ $.Values.global.nrf.addr }}:29510
+{{- end }}
+{{- end }}
+{{- else }}
+- snssai:
+    sst: 1
+    sd: 010203
+  nsiInformationList:
+    - nrfId: https://{{ .Values.global.nrf.addr }}:29510
+- snssai:
+    sst: 1
+    sd: 112233
+  nsiInformationList:
+    - nrfId: https://{{ .Values.global.nrf.addr }}:29510
+{{- end }}
+{{- end }}

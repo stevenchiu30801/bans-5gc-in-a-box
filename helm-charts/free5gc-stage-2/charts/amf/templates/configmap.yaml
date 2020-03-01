@@ -36,10 +36,18 @@ data:
             mcc: 208
             mnc: 93
           snssaiList:
+            # Not necessary to configure with all supported S-NSSAIs
+            # Since AMF queries NSSF anyway
+{{- if .Values.global.enableSlices }}
+{{- range $key, $val := .Values.global.slices }}
+{{- toYaml $val | nindent 12 }}
+{{- end }}
+{{- else }}
             - sst: 1
               sd: 010203
             - sst: 1
               sd: 112233
+{{- end }}
       supportDnnList:
         - internet
       nrfUri: https://{{ .Values.global.nrf.addr }}:29510
