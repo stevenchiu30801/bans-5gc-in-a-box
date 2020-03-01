@@ -7,7 +7,7 @@ global:
   nrf:
     addr: 192.168.2.4
   enableSlices: false
-  numOfSlices: 2
+  numOfSlices: 3
   slices:
     1:
       - sst: 1
@@ -15,6 +15,9 @@ global:
     2:
       - sst: 1
         sd: "112233"
+    3:
+      - sst: 1
+        sd: "102030"
 
 # in free5gc chart
 amf:
