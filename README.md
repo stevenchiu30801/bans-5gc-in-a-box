@@ -126,17 +126,28 @@ NOTE 1: The *make* script performs server setup for SR-IOV, such as loading devi
 ```ShellSession
 # Deploy
 make bans-5gcv2
+```
 
-# Procedure test
+#### Procedure Test
 
+```ShellSession
 # Enter RANSIM pod
 export RANSIM_POD=$( kubectl get pod -l app.kubernetes.io/instance=free5gc -l app.kubernetes.io/name=ransim -o jsonpath='{.items[0].metadata.name}' )
 kubectl exec -ti $RANSIM_POD bash
 
 # Run procedure test in RANSIM pod
+
+# If deploying with network slicing disabled
 cd src/test
 go test -v -vet=off -run TestRegistration
+
+# If deploying with network slicing enabled
+# Replace <ue-id> with slice ID in configuration .global.slices
+cd src/test
+go test -v -vet=off -run TestRegistration -ue-id=<ue-id>
 ```
+
+NOTE 1: For deploying with network slicing enabled, the Registration procedure tests should be executed in the incremental order of *\<ue-id\>*, since NGAP IDs in registration are expected to be incremented strictly.
 
 ### Customizing Configuration
 
