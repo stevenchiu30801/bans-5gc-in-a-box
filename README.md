@@ -184,9 +184,11 @@ The problem takes place when network interface connecting to eNodeB has the smal
 
 Add a dummy address, other than loopback addresses, on the loopback interface to force Kernel set source address of ARP requests to it, since loopback interface has the smallest index number.
 
-## Dockerfile
+## Images
 
 Please see [stevenchiu30801/bans-5gc-images](https://github.com/stevenchiu30801/bans-5gc-images.git).
+
+Note that ONOS image with the bandwidth management application and free5GC image of unreleased version are kept private. Please checkout branch release-1.2 for public release v2.0.2 of free5GC deployment.
 
 ## Reference
 [1] [P4-Enabled Bandwidth Management](https://ieeexplore.ieee.org/abstract/document/8892909)\

@@ -2,11 +2,12 @@
 global:
   image:
     free5gc:
+      # the free5gc-private-build image is the unreleased version of free5GC repository
       repository: free5gc-private-build
       tag: latest
   nrf:
     addr: 192.168.2.4
-  enableSlices: false
+  enableSlices: true
   numOfSlices: 3
   slices:
     1:

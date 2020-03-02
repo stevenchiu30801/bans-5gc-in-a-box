@@ -23,3 +23,10 @@
 - Add free5GC Stage 2
 - Remove free5gc-stage-1 git submodule
 - Extract Docker images to repository [stevenchiu30801/bans-5gc-images](https://github.com/stevenchiu30801/bans-5gc-images)
+
+# Release-1.3
+
+- Use unreleased version of free5GC for network slicing support
+- Support network slicing in AMF, NSSF, SMF, UPF
+- Use UPF address in NGAP-PDU Session Setup requests as GTP-U destination in RANSIM tests
+- Set UE configuration with network slices in RANSIM tests
