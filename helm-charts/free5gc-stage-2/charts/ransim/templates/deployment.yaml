@@ -34,6 +34,12 @@ spec:
             - name: test-scripts
               mountPath: /root/gofree5gc/src/test/ngsetup_test.go
               subPath: ngsetup_test.go
+            - name: test-scripts
+              mountPath: /root/gofree5gc/src/test/parse_config.go
+              subPath: parse_config.go
+            - name: ue-config
+              mountPath: /root/gofree5gc/src/test/uecfg.yaml
+              subPath: uecfg.yaml
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -41,6 +47,10 @@ spec:
           configMap:
             name: testscripts-configmap
             defaultMode: 0755
+        - name: ue-config
+          configMap:
+            name: ue-configmap
+            defaultMode: 0666
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

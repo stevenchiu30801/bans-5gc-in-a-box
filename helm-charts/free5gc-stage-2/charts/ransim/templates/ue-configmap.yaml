@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ue-configmap
+data:
+  uecfg.yaml: |
+{{- if .Values.global.enableSlices }}
+{{- range $key, $val := .Values.global.slices }}
+    - name: ue{{ $key }}
+      supi: imsi-20893000074{{ add ($key|int) 87 }}
+      ranUeNgapId: {{ $key }}
+      amfUeNgapId: {{ $key }}
+{{- range $i, $snssai := $val }}
+{{- if eq $i 0 }}
+      {{- toYaml . | nindent 6 }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -18,6 +18,7 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -32,17 +33,40 @@ import (
 const ranIpAddr string = "{{ .Values.addr }}"
 
 var (
-	sst     int
-	sd      string
+	ueId    int
 	icmpCnt int
 	icmpDst string
 )
 
+var ueData test.UeData
+
 func init() {
-	flag.IntVar(&sst, "sst", 1, "SST of S-NSSAI")
-	flag.StringVar(&sd, "sd", "010203", "SD of S-NSSAI")
+	flag.IntVar(&ueId, "ue-id", 0, "UE ID")
 	flag.IntVar(&icmpCnt, "icmp-cnt", 5, "ICMP packet count to be sent")
 	flag.StringVar(&icmpDst, "icmp-dst", "8.8.8.8", "Destination address of ICMP packets")
+	flag.Parse()
+
+	// default ue
+	test.Ues = append(test.Ues, test.UeData{
+		Supi:        "imsi-2089300007487",
+		RanUeNgapId: 1,
+		AmfUeNgapId: 1,
+		MobileIdentity5GS: nasType.MobileIdentity5GS{
+			Len:    12,
+			Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
+		},
+		Sst: 1,
+		Sd:  "010203",
+	})
+
+	// parse ue configuration
+	err := test.ParseConfig("uecfg.yaml")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	ueData = test.Ues[ueId]
 }
 
 func getAuthSubscription() (authSubs models.AuthenticationSubscription) {
@@ -148,9 +172,10 @@ func TestRegistration(t *testing.T) {
 	assert.Nil(t, err)
 
 	// New UE
-	ue := test.NewRanUeContext("imsi-2089300007487", 1, test.ALG_CIPHERING_128_NEA2, test.ALG_INTEGRITY_128_NIA2)
+	ue := test.NewRanUeContext(ueData.Supi, 1, test.ALG_CIPHERING_128_NEA2, test.ALG_INTEGRITY_128_NIA2)
 	// ue := test.NewRanUeContext("imsi-2089300007487", 1, test.ALG_CIPHERING_128_NEA0, test.ALG_INTEGRITY_128_NIA0)
-	ue.AmfUeNgapId = 1
+	ue.AmfUeNgapId = ueData.AmfUeNgapId
+	ue.RanUeNgapId = ueData.RanUeNgapId
 	ue.AuthenticationSubs = getAuthSubscription()
 	// insert UE data to MongoDB
 
@@ -178,10 +203,7 @@ func TestRegistration(t *testing.T) {
 	}
 
 	// send InitialUeMessage(Registration Request)(imsi-2089300007487)
-	mobileIdentity5GS := nasType.MobileIdentity5GS{
-		Len:    12, // suci
-		Buffer: []uint8{0x01, 0x02, 0xf8, 0x39, 0xf0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x47, 0x78},
-	}
+	mobileIdentity5GS := ueData.MobileIdentity5GS
 	registrationRequest := nasTestpacket.GetRegistrationRequestWith5GMM(nasMessage.RegistrationType5GSInitialRegistration, mobileIdentity5GS, nil, nil)
 	sendMsg, err = test.GetInitialUEMessage(ue.RanUeNgapId, registrationRequest, "")
 	assert.Nil(t, err)
@@ -247,8 +269,8 @@ func TestRegistration(t *testing.T) {
 	// send GetPduSessionEstablishmentRequest Msg
 
 	sNssai := models.Snssai{
-		Sst: int32(sst),
-		Sd:  sd,
+		Sst: ueData.Sst,
+		Sd:  ueData.Sd,
 	}
 	pdu = nasTestpacket.GetUlNasTransport_PduSessionEstablishmentRequest(10, nasMessage.ULNASTransportRequestTypeInitialRequest, "internet", &sNssai)
 	pdu, err = test.EncodeNasPduWithSecurity(ue, pdu)
