@@ -31,6 +31,9 @@ EXISTING_VF=$( ip link show $1 | grep -c vf )
 if [[ ${EXISTING_VF} -eq $2 ]]; then
     echo "Number of existing VFs is exactly $2"
     exit 0
+elif [[ ${EXISTING_VF} -ne 0 ]]; then
+    # Reset VFs
+    echo 0 | sudo tee /sys/class/net/$1/device/sriov_numvfs >/dev/null
 fi
 
 # Check if IOMMU support for Linux kernel is enable
