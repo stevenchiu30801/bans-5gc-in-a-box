@@ -3,8 +3,8 @@ kind: ConfigMap
 metadata:
   name: free5gc-configmap
   # pre-install before any free5gc component
-  annotations:
-    "helm.sh/hook": pre-install
+  # annotations:
+  #   "helm.sh/hook": pre-install
 data:
   free5gc.conf: |
     db_uri: {{ .Values.global.dbUri }}
